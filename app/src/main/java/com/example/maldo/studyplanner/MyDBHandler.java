@@ -40,21 +40,16 @@ public class MyDBHandler extends SQLiteOpenHelper {
     public static final String COLUMN_SM_MOD_ID = "_sm_mod_id"; // PK FK
     public static final String COLUMN_SM_STATUS = "_sm_status"; //"active", "inactive", "passed"
 
-    // CREATE TABLE pathways
-    // CREATE TABLE modules
-    // CREATE TABLE mod_path
-    // CREATE TABLE student
-    // CREATE TABLE stud_mod
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        //Create table Pathways
+        // CREATE TABLE pathways
         db.execSQL("CREATE TABLE IF NOT EXISTS "+ TABLE_PATHWAYS + " ( " +
                 COLUMN_PATH_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_PATH_NAME + " TEXT " +
                 ");");
 
-        //Create table Modules
+        // CREATE TABLE modules
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MODULES + " ( " +
                 COLUMN_MOD_ID + "TEXT PRIMARY KEY, " +
                 COLUMN_MOD_NAME + " TEXT, " +
@@ -63,7 +58,7 @@ public class MyDBHandler extends SQLiteOpenHelper {
                 COLUMN_MOD_DESC + " TEXT " +
                 ");");
 
-        //Create table Mod Path
+        // CREATE TABLE mod_path
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_MOD_PATH + " ( " +
                 COLUMN_MP_MOD_ID + " TEXT, " +
                 COLUMN_MP_PATH_ID + " TEXT, " +
@@ -72,16 +67,18 @@ public class MyDBHandler extends SQLiteOpenHelper {
                 "PRIMARY KEY(" + COLUMN_MP_MOD_ID +","+ COLUMN_MP_PATH_ID +") " +
                 ");");
 
+        // CREATE TABLE student
         db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_STUDENTS + " ( " +
                         COLUMN_STUD_ID + "INTEGER PRIMARY KEY, " +
                         COLUMN_STUD_FNAME + " TEXT, " +
                         COLUMN_STUD_LNAME + " TEXT, " +
                         COLUMN_STUD_EMAIL + " TEXT, " +
-                        COLUMN_STUD_PATH + " TEXT, " +
+                        COLUMN_STUD_PATH + " INTEGER, " +
                         "FOREIGN KEY (" + COLUMN_STUD_PATH + ") REFERENCES " +
                         TABLE_PATHWAYS + "(" + COLUMN_PATH_ID + ")" +
                         "); ");
 
+        // CREATE TABLE stud_mod
         db.execSQL("CREATE TABLE " + TABLE_STUD_MOD + "(" +
                         COLUMN_SM_STUD_ID + " INTEGER, " +
                         COLUMN_SM_MOD_ID + " TEXT, " +
