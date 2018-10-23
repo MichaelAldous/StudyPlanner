@@ -15,18 +15,52 @@ public class MyDBHandler extends SQLiteOpenHelper {
 
     public void onCreate(SQLiteDatabase db)
     {
-        // creating the data table for the database
-        final String SQL_CREATE_DATA_TABLE = "CREATE TABLE " + pathwaysEntry.TABLE_PATHWAYS + "( " +
+        // creating the pathways table
+        final String SQL_CREATE_PATHWAYS_TABLE = "CREATE TABLE " + pathwaysEntry.TABLE_PATHWAYS + "( " +
                 pathwaysEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 pathwaysEntry.COLUMN_PATH_NAME+ " TEXT NOT NULL " + ");";
-        db.execSQL(SQL_CREATE_DATA_TABLE);
+        db.execSQL(SQL_CREATE_PATHWAYS_TABLE);
+
+        // creating the modules table
+        final String SQL_CREATE_MODULES_TABLE = "CREATE TABLE " + modulesEntry.TABLE_MODULES + "( " +
+                modulesEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                modulesEntry.COLUMN_MOD_NAME+ " TEXT NOT NULL, " +
+                modulesEntry.COLUMN_MOD_PREREQ + " TEXT NOT NULL, " +
+                modulesEntry.COLUMN_MP_SEMESTER + " TEXT NOT NULL, " +
+                modulesEntry.COLUMN_MOD_DESC + "TEXT NOT NULL "+ ");";
+        db.execSQL(SQL_CREATE_MODULES_TABLE);
+
+        // creating the mod path table
+        final String SQL_CREATE_MODPATH_TABLE = "CREATE TABLE " + modPathsEntry.TABLE_MOD_PATH + "( " +
+                modPathsEntry.COLUMN_MP_MOD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                modPathsEntry.COLUMN_MP_PATH_ID + " INTEGER PRIMARY KEY AUTOINCREMENT "+ ");";
+        db.execSQL(SQL_CREATE_MODPATH_TABLE);
+
+        // creating the student table
+        final String SQL_CREATE_STUDENT_TABLE = "CREATE TABLE " + studentEntry.TABLE_STUDENTS + "( " +
+                studentEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                studentEntry.COLUMN_STUD_FNAME+ " TEXT NOT NULL, " +
+                studentEntry.COLUMN_STUD_LNAME+ " TEXT NOT NULL, " +
+                studentEntry.COLUMN_STUD_EMAIL+ " TEXT NOT NULL " + ");";
+        db.execSQL(SQL_CREATE_STUDENT_TABLE);
+
+        // creating the student module table
+        final String SQL_CREATE_STUDENTMODULE_TABLE = "CREATE TABLE " + studentModuleEntry.TABLE_STUD_MOD + "( " +
+                studentModuleEntry.COLUMN_SM_STUD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                studentModuleEntry.COLUMN__SM_MOD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                studentModuleEntry.COLUMN__SM_STATUS + " TEXT NOT NULL "  + ");";
+        db.execSQL(SQL_CREATE_STUDENTMODULE_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
     {
         // for updating the database
-        db.execSQL("DROP TABLE IF EXISTS " + dataEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + pathwaysEntry.TABLE_PATHWAYS);
+        db.execSQL("DROP TABLE IF EXISTS " + modulesEntry.TABLE_MODULES);
+        db.execSQL("DROP TABLE IF EXISTS " + modPathsEntry.TABLE_MOD_PATH);
+        db.execSQL("DROP TABLE IF EXISTS " + studentEntry.TABLE_STUDENTS);
+        db.execSQL("DROP TABLE IF EXISTS " + studentModuleEntry.TABLE_STUD_MOD);
         onCreate(db);
     }
 
