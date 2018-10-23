@@ -13,21 +13,21 @@ public class MyDBHandler extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
-    @Override
-    public void onCreate(SQLiteDatabase db) {
-        final String SQL_CREATE_PATHWAY_TABLE = "CREATE TABLE " + pathwayEntry.TABLE_PATHWAYS + "( " +
-                pathwayEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                pathwayEntry.COLUMN_PATH_NAME + " TEXT NOT NULL " + ");";
-        db.execSQL(SQL_CREATE_PATHWAY_TABLE);
-        final String SQL_CREATE_MODULES_TABLE = "CREATE TABLE " + modpathEntry.COLUMN_MP_PATH_ID + "( " +
-                modpathEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                modpathEntry.TABLE_MOD_PATH + " TEXT NOT NULL " + ");";
-        db.execSQL(SQL_CREATE_MODULES_TABLE);
+    public void onCreate(SQLiteDatabase db)
+    {
+        // creating the data table for the database
+        final String SQL_CREATE_DATA_TABLE = "CREATE TABLE " + pathwaysEntry.TABLE_PATHWAYS + "( " +
+                pathwaysEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                pathwaysEntry.COLUMN_PATH_NAME+ " TEXT NOT NULL " + ");";
+        db.execSQL(SQL_CREATE_DATA_TABLE);
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
+    {
+        // for updating the database
+        db.execSQL("DROP TABLE IF EXISTS " + dataEntry.TABLE_NAME);
+        onCreate(db);
     }
 
 //    // PATHWAYS TABLE
