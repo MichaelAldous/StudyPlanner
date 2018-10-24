@@ -1,5 +1,6 @@
 package com.example.maldo.studyplanner;
 
+import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.content.Context;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -25,7 +26,7 @@ public class MyDBHandler extends SQLiteOpenHelper {
         // creating the modules table
         final String SQL_CREATE_MODULES_TABLE = "CREATE TABLE " +
                 modulesEntry.TABLE_MODULES + "( " +
-                modulesEntry.COLUMN_MOD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                modulesEntry.COLUMN_MOD_ID + " TEXT PRIMARY KEY, " +
                 modulesEntry.COLUMN_MOD_NAME+ " TEXT NOT NULL, " +
                 modulesEntry.COLUMN_MOD_PREREQ + " TEXT NOT NULL, " +
                 modulesEntry.COLUMN_MP_SEMESTER + " TEXT NOT NULL, " +
@@ -35,8 +36,11 @@ public class MyDBHandler extends SQLiteOpenHelper {
         // creating the mod path table
         final String SQL_CREATE_MODPATH_TABLE = "CREATE TABLE " +
                 modPathsEntry.TABLE_MOD_PATH + "( " +
-                modPathsEntry.COLUMN_MP_MOD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                modPathsEntry.COLUMN_MP_PATH_ID + " INTEGER PRIMARY KEY AUTOINCREMENT "+ ");";
+                modPathsEntry.COLUMN_MP_MOD_ID + " INTEGER, " +
+                modPathsEntry.COLUMN_MP_PATH_ID + " INTEGER, " +
+                "PRIMARY KEY("+modPathsEntry.COLUMN_MP_MOD_ID +","+ modPathsEntry.COLUMN_MP_PATH_ID+"), "+
+                "FOREIGN KEY("+modPathsEntry.COLUMN_MP_MOD_ID +") REFERENCES "+modulesEntry.TABLE_MODULES+"("+modulesEntry.COLUMN_MOD_ID+"),"+
+                "FOREIGN KEY("+modPathsEntry.COLUMN_MP_PATH_ID+") REFERENCES "+pathwaysEntry.TABLE_PATHWAYS+"("+pathwaysEntry.COLUMN_PATH_ID+"));";
         db.execSQL(SQL_CREATE_MODPATH_TABLE);
 
         // creating the student table
@@ -52,7 +56,7 @@ public class MyDBHandler extends SQLiteOpenHelper {
         final String SQL_CREATE_STUDENTMODULE_TABLE = "CREATE TABLE " +
                 studentModuleEntry.TABLE_STUD_MOD + "( " +
                 studentModuleEntry.COLUMN_SM_STUD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                studentModuleEntry.COLUMN__SM_MOD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                studentModuleEntry.COLUMN__SM_MOD_ID + " TEXT NOT NULL, " +
                 studentModuleEntry.COLUMN__SM_STATUS + " TEXT NOT NULL "  + ");";
         db.execSQL(SQL_CREATE_STUDENTMODULE_TABLE);
     }
@@ -67,6 +71,17 @@ public class MyDBHandler extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + studentEntry.TABLE_STUDENTS);
         db.execSQL("DROP TABLE IF EXISTS " + studentModuleEntry.TABLE_STUD_MOD);
         onCreate(db);
+    }
+
+    public void AddStudent(int studID, String fName, String lName, String email){
+        ContentValues values = new ContentValues();
+        values.put(studentEntry.COLUMN_STUD_ID, studID);
+        values.put(studentEntry.COLUMN_STUD_FNAME, fName);
+        values.put(studentEntry.COLUMN_STUD_LNAME, lName);
+        values.put(studentEntry.COLUMN_STUD_EMAIL, email);
+        SQLiteDatabase db = getWritableDatabase();
+        db.insert(studentEntry.TABLE_STUDENTS, null, values);
+        db.close();
     }
 
 //    // PATHWAYS TABLE
