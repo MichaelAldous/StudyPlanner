@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-public class AdminActivity extends AppCompatActivity {
+public class ActivityAdmin extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -19,7 +19,7 @@ public class AdminActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(AdminActivity.this, EditorActivity.class);
+                Intent intent = new Intent(ActivityAdmin.this, ActivityEditor.class);
                 startActivity(intent);
             }
         });

@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 
-public class SplashActivity extends AppCompatActivity {
+public class ActivitySplash extends AppCompatActivity {
     Handler handler;
     MyDBHandler dbHandler;
     @Override
@@ -19,7 +19,7 @@ public class SplashActivity extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent intent=new Intent(SplashActivity.this,MainActivity.class);
+                Intent intent=new Intent(ActivitySplash.this,MainActivity.class);
                 startActivity(intent);
                 finish();
             }

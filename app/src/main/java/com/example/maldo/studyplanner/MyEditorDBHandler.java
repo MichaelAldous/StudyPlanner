@@ -1,16 +1,21 @@
 package com.example.maldo.studyplanner;
 
 import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import com.example.maldo.studyplanner.Data.*;
 
-public class MyDBHandler extends SQLiteOpenHelper {
+import com.example.maldo.studyplanner.Data.modPathsEntry;
+import com.example.maldo.studyplanner.Data.modulesEntry;
+import com.example.maldo.studyplanner.Data.pathwaysEntry;
+import com.example.maldo.studyplanner.Data.studentEntry;
+import com.example.maldo.studyplanner.Data.studentModuleEntry;
+
+public class MyEditorDBHandler extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
-    private static final String DATABASE_NAME = "planner.db";
+    private static final String DATABASE_NAME = "editor.db";
 
-    public MyDBHandler(Context context) {
+    public MyEditorDBHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -83,31 +88,6 @@ public class MyDBHandler extends SQLiteOpenHelper {
         db.insert(studentEntry.TABLE_STUDENTS, null, values);
         db.close();
     }
-
-    //Remove student
-    public void RemoveStudent(int studID){
-        //Remove from mod_student
-
-        //Remove student
-    }
-    //Search students?
-    public void SearchStudents(){
-        //Search student table
-        //return student name + id
-    }
-
-    public void GetStudentModules(){
-        //Search for student modules + returns name and if they've passed etc.
-    }
-
-    public void StudentModUpdate(){
-        //Update stud_mod table if student passes module, or new one meets prerequisites
-    }
-
-    //Create student object to store data in for app???
-
-
-
 
 //    // PATHWAYS TABLE
 //    public static final String TABLE_PATHWAYS = "pathways";

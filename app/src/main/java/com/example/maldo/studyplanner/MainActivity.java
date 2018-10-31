@@ -14,6 +14,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Button plannerButton = findViewById(R.id.buttonPlanner);
+        Button manageStudentButton = findViewById(R.id.buttonManageStudent);
         Button adminButton = findViewById(R.id.buttonAdmin);
         Button aboutButton = findViewById(R.id.buttonAbout);
 
@@ -22,7 +23,16 @@ public class MainActivity extends AppCompatActivity {
         plannerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, StudentActivity.class);
+                Intent intent = new Intent(MainActivity.this, ActivitySelectStudent.class);
+                startActivity(intent);
+            }
+        });
+
+        //onClick listener for cake button, passes cake recipes to new intent
+        manageStudentButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, ActivityManageStudents.class);
                 startActivity(intent);
             }
         });
@@ -31,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
         adminButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, AdminActivity.class);
+                Intent intent = new Intent(MainActivity.this, ActivityAdmin.class);
                 startActivity(intent);
             }
         });
@@ -40,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         aboutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, AboutActivity.class);
+                Intent intent = new Intent(MainActivity.this, ActivityAbout.class);
                 startActivity(intent);
             }
         });

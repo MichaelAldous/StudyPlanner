@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.Button;
 
 
-public class PlannerActivity extends AppCompatActivity {
+public class ActivityPlanner extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

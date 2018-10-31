@@ -18,6 +18,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buttonAdmin" />
 
+    <Button
+        android:id="@+id/buttonManageStudent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Manage Students"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonPlanner" />
+
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
@@ -38,7 +50,7 @@
         android:text="Admin"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonPlanner" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonManageStudent" />
 
     <Button
         android:id="@+id/buttonPlanner"
