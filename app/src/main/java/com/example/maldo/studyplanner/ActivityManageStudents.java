@@ -1,5 +1,6 @@
 package com.example.maldo.studyplanner;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -53,6 +54,9 @@ public class ActivityManageStudents extends AppCompatActivity {
                                     Matcher matcher = Patterns.EMAIL_ADDRESS.matcher(email);
                                     if(matcher.matches()){
                                         // Add student to DB
+                                        int studentIDPass = Integer.parseInt(studIDString);
+                                        MyDBHandler handler = new MyDBHandler(getApplicationContext());
+                                        handler.AddStudent(studentIDPass,fName,lName,email);
                                         // Then populate stud_mod table
 
                                         Toast.makeText(getApplicationContext(), "Student Added",
@@ -148,5 +152,7 @@ public class ActivityManageStudents extends AppCompatActivity {
                 }
             }
         }); //End of addButton.setOnClick
+
+
     }
 }

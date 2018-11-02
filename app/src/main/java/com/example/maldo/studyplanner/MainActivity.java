@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
         Button aboutButton = findViewById(R.id.buttonAbout);
 
 
-        //onClick listener for cake button, passes cake recipes to new intent
+        //onClick listener for PLANNER button
         plannerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //onClick listener for cake button, passes cake recipes to new intent
+        //onClick listener for MANAGE STUDENT button
         manageStudentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //onClick listener for cake button, passes cake recipes to new intent
+        //onClick listener for ADMIN button
         adminButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //onClick listener for cake button, passes cake recipes to new intent
+        //onClick listener for ABOUT button
         aboutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
