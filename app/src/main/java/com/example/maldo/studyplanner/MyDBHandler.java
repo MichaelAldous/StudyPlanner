@@ -6,6 +6,9 @@ import android.content.Context;
 import android.database.sqlite.SQLiteOpenHelper;
 import com.example.maldo.studyplanner.Data.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class MyDBHandler extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "planner.db";
@@ -30,7 +33,8 @@ public class MyDBHandler extends SQLiteOpenHelper {
                 modulesEntry.COLUMN_MOD_NAME+ " TEXT NOT NULL, " +
                 modulesEntry.COLUMN_MOD_PREREQ + " TEXT NOT NULL, " +
                 modulesEntry.COLUMN_MP_SEMESTER + " TEXT NOT NULL, " +
-                modulesEntry.COLUMN_MOD_DESC + "TEXT NOT NULL "+ ");";
+                modulesEntry.COLUMN_MOD_DESC + " TEXT NOT NULL, " +
+                modulesEntry.COLUMN_MOD_CRED + " TEXT NOT NULL " + ");";
         db.execSQL(SQL_CREATE_MODULES_TABLE);
 
         // creating the mod path table
@@ -42,6 +46,16 @@ public class MyDBHandler extends SQLiteOpenHelper {
                 "FOREIGN KEY("+modPathsEntry.COLUMN_MP_MOD_ID +") REFERENCES "+modulesEntry.TABLE_MODULES+"("+modulesEntry.COLUMN_MOD_ID+"),"+
                 "FOREIGN KEY("+modPathsEntry.COLUMN_MP_PATH_ID+") REFERENCES "+pathwaysEntry.TABLE_PATHWAYS+"("+pathwaysEntry.COLUMN_PATH_ID+"));";
         db.execSQL(SQL_CREATE_MODPATH_TABLE);
+
+        // creating the mod preque table
+        final String SQL_CREATE_MODPREREQ_TABLE = "CREATE TABLE " +
+                modPrereqEntry.TABLE_MOD_PREREQ + "( " +
+                modPrereqEntry.COLUMN_MP_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                modPrereqEntry.COLUMN_MP_MOD_ID + " TEXT, " +
+                modPrereqEntry.COLUMN_MP_PREREQ_ID + " TEXT, " +
+                "FOREIGN KEY("+modPathsEntry.COLUMN_MP_MOD_ID +") REFERENCES "+modulesEntry.TABLE_MODULES+"("+modulesEntry.COLUMN_MOD_ID+"),"+
+                "FOREIGN KEY("+modPathsEntry.COLUMN_MP_PATH_ID+") REFERENCES "+pathwaysEntry.TABLE_PATHWAYS+"("+pathwaysEntry.COLUMN_PATH_ID+"));";
+        db.execSQL(SQL_CREATE_MODPREREQ_TABLE);
 
         // creating the student table
         final String SQL_CREATE_STUDENT_TABLE = "CREATE TABLE " +
@@ -59,17 +73,19 @@ public class MyDBHandler extends SQLiteOpenHelper {
                 studentModuleEntry.COLUMN__SM_MOD_ID + " TEXT NOT NULL, " +
                 studentModuleEntry.COLUMN__SM_STATUS + " TEXT NOT NULL "  + ");";
         db.execSQL(SQL_CREATE_STUDENTMODULE_TABLE);
+        this.PopulateDB(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
     {
         // for updating the database
+        db.execSQL("DROP TABLE IF EXISTS " + modPrereqEntry.TABLE_MOD_PREREQ);
+        db.execSQL("DROP TABLE IF EXISTS " + modPathsEntry.TABLE_MOD_PATH);
+        db.execSQL("DROP TABLE IF EXISTS " + studentModuleEntry.TABLE_STUD_MOD);
         db.execSQL("DROP TABLE IF EXISTS " + pathwaysEntry.TABLE_PATHWAYS);
         db.execSQL("DROP TABLE IF EXISTS " + modulesEntry.TABLE_MODULES);
-        db.execSQL("DROP TABLE IF EXISTS " + modPathsEntry.TABLE_MOD_PATH);
         db.execSQL("DROP TABLE IF EXISTS " + studentEntry.TABLE_STUDENTS);
-        db.execSQL("DROP TABLE IF EXISTS " + studentModuleEntry.TABLE_STUD_MOD);
         onCreate(db);
     }
 
@@ -104,40 +120,104 @@ public class MyDBHandler extends SQLiteOpenHelper {
         //Update stud_mod table if student passes module, or new one meets prerequisites
     }
 
-    //Create student object to store data in for app???
+    public void AddModule(SQLiteDatabase db, String modID, String modName,  int cred, int semester, String description, ArrayList<String> prereq, ArrayList<Integer> pathways){
+        //Add module to module table
+        ContentValues values = new ContentValues();
+        values.put(modulesEntry.COLUMN_MOD_ID, modID);
+        values.put(modulesEntry.COLUMN_MOD_NAME, modName);
+        values.put(modulesEntry.COLUMN_MP_SEMESTER, semester);
+        values.put(modulesEntry.COLUMN_MOD_DESC, description);
+        values.put(modulesEntry.COLUMN_MOD_CRED, cred);
+        db.insert(modulesEntry.TABLE_MODULES, null, values);
+
+        //Add module pre-requirements
+        values = new ContentValues();
+        if(prereq!=null) {
+            for (String s : prereq) {
+                values.put(modID, s);
+            }
+        }
+        db.insert(modPrereqEntry.TABLE_MOD_PREREQ, null, values);
+
+        values = new ContentValues();
+        if(pathways!=null){
+            for(Integer pathID : pathways){
+                values.put(modID, pathID);
+            }
+        } else {
+            values.put(modID, 5);
+        }
+
+    }
+
+    public void AddPathways(SQLiteDatabase db, String pathwayName){
+        //Add module to module table
+        ContentValues values = new ContentValues();
+        values.put(pathwaysEntry.COLUMN_PATH_NAME, pathwayName);
+        db.insert(modulesEntry.TABLE_MODULES, null, values);
+    }
+
+
+    //populate
+    public void PopulateDB(SQLiteDatabase db){
+        //pathway(5)
+        //Network Engineering
+        //Software Engineering
+        //Database Architecture
+        //Multimedia and Web Development
+        //Core == Null??
+        this.AddPathways(db, "Software Engineering"); //1
+        this.AddPathways(db, "Network Engineering"); //2
+        this.AddPathways(db, "Database Architecture"); //3
+        this.AddPathways(db, "Multimedia and Web Development"); //4
+        this.AddPathways(db, "Core");
+
+
+        //Modules()
+        //Database, ID, Name, ArrayList<String> Pre-reqs, credits, semester, description, ArrayList<Integer> pathways
+        //this.AddModule(db, "", "",null,15, 2,"Info501 desc", null);
+        ArrayList<String> prequeList = new ArrayList<>(Arrays.asList(""));
+        ArrayList<Integer> pathwayList = new ArrayList<>();
+
+        //Semester 1
+        this.AddModule(db, "COMP501", "IT Operations",15, 1,"COMP501 desc",prequeList, null);
+        this.AddModule(db, "COMP502", "Fundamentals of Programming and Problem Solving",15, 1,"COMP502 desc", prequeList, null);
+        this.AddModule(db, "INFO501", "Professional Practice",15, 1,"INFO501 desc", prequeList, null);
+        this.AddModule(db, "INFO502", "Business Systems Analysis & Design",15, 1,"INFO502 desc", prequeList, null);
+
+        //Semester 2
+        this.AddModule(db, "COMP503", "Introduction to Networks (Cisco 1)",15, 2,"COMP503 desc", prequeList, null);
+        this.AddModule(db, "COMP504", "Operating Systems & Systems Support",15, 2,"COMP504 desc", prequeList, null);
+        this.AddModule(db, "INFO503", "Database Principles",15, 2,"INFO503 desc", prequeList, null);
+        this.AddModule(db, "INFO504", "Technical Support",15, 2,"INFO504 desc", prequeList, null);
+
+        //Semester 3
+        prequeList = new ArrayList<>(Arrays.asList("COMP502"));
+        this.AddModule(db, "COMP601", "Object Oriented Programming",15, 3,"COMP601 desc",prequeList, null);
+        prequeList = new ArrayList<>(Arrays.asList("INFO503"));
+        this.AddModule(db, "INFO601", "Data-modelling and SQL",15, 3,"INFO601 desc",prequeList, null);
+        prequeList = new ArrayList<>(Arrays.asList(""));
+        this.AddModule(db, "MATH601", "Mathematics for IT",15, 3,"MATH601 desc",prequeList, null);
+        prequeList = new ArrayList<>(Arrays.asList("COMP502","INFO502"));
+        this.AddModule(db, "COMP602", "Web Development",15, 3,"COMP602 desc",prequeList, null);
+
+        //Semester 4
+        prequeList = new ArrayList<>(Arrays.asList(""));
+        this.AddModule(db, "", "",15, 4,"Info501 desc",prequeList, null);
+
+        //Semester 5
+
+        //Semester 6
+
+        //Path mods
+
+
+        //Close db
+        db.close();
+    }
 
 
 
 
-//    // PATHWAYS TABLE
-//    public static final String TABLE_PATHWAYS = "pathways";
-//    public static final String COLUMN_PATH_ID = "_path_id"; // auto increment number?
-//    public static final String COLUMN_PATH_NAME = "_path_name"; // "Core", "Software Engineering", "Database Architecture", "Networking", "Multi Media Web Development"
-//
-//    // MODULES TABLE
-//    public static final String TABLE_MODULES = "modules";
-//    public static final String COLUMN_MOD_ID = "_mod_id"; //"INFO703" etc.
-//    public static final String COLUMN_MOD_NAME = "_mod_name"; //Mobile App Dev
-//    public static final String COLUMN_MOD_PREREQ = "_mod_prereq"; // "MAT501", can be null etc.
-//    public static final String COLUMN_MP_SEMESTER = "_mp_semester"; // FK
-//    public static final String COLUMN_MOD_DESC = "_mod_desc"; // "For mobile app we make apps blah blah blah"
-//
-//    // MOD PATH TABLE
-//    public static final String TABLE_MOD_PATH = "mod_path";
-//    public static final String COLUMN_MP_MOD_ID = "_mp_mod_id"; // PK FK
-//    public static final String COLUMN_MP_PATH_ID = "_mp_path_id"; // PK FK
-//
-//    // STUDENT TABLE
-//    public static final String TABLE_STUDENTS = "student";
-//    public static final String COLUMN_STUD_ID = "_stud_id"; // PK 17451234
-//    public static final String COLUMN_STUD_FNAME = "_stud_fname"; // "Bob"
-//    public static final String COLUMN_STUD_LNAME = "_stud_lname"; // "Johns"
-//    public static final String COLUMN_STUD_EMAIL = "_stud_email"; // "bobjohns@student.wintec.ac.nz"
-//
-//    //STUDENT MODULE TABLE
-//    public static final String TABLE_STUD_MOD = "stud_mod";
-//    public static final String COLUMN_SM_STUD_ID = "_sm_stud_id"; // PK FK
-//    public static final String COLUMN__SM_MOD_ID = "_sm_mod_id"; // PK FK
-//    public static final String COLUMN__SM_STATUS = "_sm_status"; //"active", "inactive", "passed"
 
 }
