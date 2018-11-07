@@ -1,10 +1,15 @@
 package com.example.maldo.studyplanner;
 
+import android.content.Context;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -18,6 +23,19 @@ public class MainActivity extends AppCompatActivity {
         Button adminButton = findViewById(R.id.buttonAdmin);
         Button aboutButton = findViewById(R.id.buttonAbout);
 
+        MyDBHandler dbHandler = new MyDBHandler(this);
+        if(!checkDB(this, "planner.db")){
+            Log.d("checkDB", "onCreate: DB DOES NOT EXIST");
+            dbHandler.getWritableDatabase();
+            dbHandler.PopulateDB();
+            //Create database
+            //dbHandler = new MyDBHandler(this);
+
+        } else {
+            Log.d("checkDB", "onCreate: DB DOES EXIST");
+            //dbHandler.getWritableDatabase();
+            //Check DB versions
+        }
 
         //onClick listener for PLANNER button
         plannerButton.setOnClickListener(new View.OnClickListener() {
@@ -54,5 +72,10 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    private static boolean checkDB(Context context, String dbName){
+        File dbFile = context.getDatabasePath(dbName);
+        return dbFile.exists();
     }
 }

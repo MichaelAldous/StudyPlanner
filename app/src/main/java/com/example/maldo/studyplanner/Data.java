@@ -35,10 +35,10 @@ public class Data {
     // MOD PREREQ
     public static final class modPrereqEntry implements BaseColumns
     {
-        public static final String TABLE_MOD_PREREQ = "mod_prereq";
+        public static final String TABLE_REQUIREMENTS = "mod_prereq";
         public static final String COLUMN_MP_ID = "_mp_id";
-        public static final String COLUMN_MP_MOD_ID = "_mp_mod_id"; // PK FK
-        public static final String COLUMN_MP_PREREQ_ID = "_mp_prereq_id"; // PK FK
+        public static final String COLUMN_REQ_MOD_ID = "_mp_mod_id"; // PK FK
+        public static final String COLUMN_REQ_REQMOD_ID = "_mp_prereq_id"; // PK FK
     }
 
     // STUDENT TABLE

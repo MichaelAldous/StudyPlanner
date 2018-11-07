@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.content.Context;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
 import com.example.maldo.studyplanner.Data.*;
 
 import java.util.ArrayList;
@@ -17,27 +19,26 @@ public class MyDBHandler extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
-    public void onCreate(SQLiteDatabase db)
-    {
-        // creating the pathways table
+    public void onCreate(SQLiteDatabase db){
+        Log.d("MyDBHandler", "onCreate: Database ");
+        // create PATHWAYS
         final String SQL_CREATE_PATHWAYS_TABLE = "CREATE TABLE " +
                 pathwaysEntry.TABLE_PATHWAYS + "( " +
                 pathwaysEntry.COLUMN_PATH_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 pathwaysEntry.COLUMN_PATH_NAME+ " TEXT NOT NULL " + ");";
         db.execSQL(SQL_CREATE_PATHWAYS_TABLE);
 
-        // creating the modules table
+        // create MODULES
         final String SQL_CREATE_MODULES_TABLE = "CREATE TABLE " +
                 modulesEntry.TABLE_MODULES + "( " +
                 modulesEntry.COLUMN_MOD_ID + " TEXT PRIMARY KEY, " +
                 modulesEntry.COLUMN_MOD_NAME+ " TEXT NOT NULL, " +
-                modulesEntry.COLUMN_MOD_PREREQ + " TEXT NOT NULL, " +
                 modulesEntry.COLUMN_MP_SEMESTER + " TEXT NOT NULL, " +
                 modulesEntry.COLUMN_MOD_DESC + " TEXT NOT NULL, " +
                 modulesEntry.COLUMN_MOD_CRED + " TEXT NOT NULL " + ");";
         db.execSQL(SQL_CREATE_MODULES_TABLE);
 
-        // creating the mod path table
+        // create MODULE PATHWAYS
         final String SQL_CREATE_MODPATH_TABLE = "CREATE TABLE " +
                 modPathsEntry.TABLE_MOD_PATH + "( " +
                 modPathsEntry.COLUMN_MP_MOD_ID + " INTEGER, " +
@@ -47,17 +48,17 @@ public class MyDBHandler extends SQLiteOpenHelper {
                 "FOREIGN KEY("+modPathsEntry.COLUMN_MP_PATH_ID+") REFERENCES "+pathwaysEntry.TABLE_PATHWAYS+"("+pathwaysEntry.COLUMN_PATH_ID+"));";
         db.execSQL(SQL_CREATE_MODPATH_TABLE);
 
-        // creating the mod preque table
+        // create MODULE PREREQUISITES
         final String SQL_CREATE_MODPREREQ_TABLE = "CREATE TABLE " +
-                modPrereqEntry.TABLE_MOD_PREREQ + "( " +
-                modPrereqEntry.COLUMN_MP_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                modPrereqEntry.COLUMN_MP_MOD_ID + " TEXT, " +
-                modPrereqEntry.COLUMN_MP_PREREQ_ID + " TEXT, " +
-                "FOREIGN KEY("+modPathsEntry.COLUMN_MP_MOD_ID +") REFERENCES "+modulesEntry.TABLE_MODULES+"("+modulesEntry.COLUMN_MOD_ID+"),"+
-                "FOREIGN KEY("+modPathsEntry.COLUMN_MP_PATH_ID+") REFERENCES "+pathwaysEntry.TABLE_PATHWAYS+"("+pathwaysEntry.COLUMN_PATH_ID+"));";
+                modPrereqEntry.TABLE_REQUIREMENTS + "( " +
+                modPrereqEntry.COLUMN_REQ_MOD_ID + " TEXT, " +
+                modPrereqEntry.COLUMN_REQ_REQMOD_ID + " TEXT, " +
+                "PRIMARY KEY("+modPrereqEntry.COLUMN_REQ_MOD_ID +","+ modPrereqEntry.COLUMN_REQ_REQMOD_ID+"), "+
+                "FOREIGN KEY("+modPrereqEntry.COLUMN_REQ_MOD_ID +") REFERENCES "+modulesEntry.TABLE_MODULES+"("+modulesEntry.COLUMN_MOD_ID+"),"+
+                "FOREIGN KEY("+modPrereqEntry.COLUMN_REQ_REQMOD_ID+") REFERENCES "+modulesEntry.TABLE_MODULES+"("+modulesEntry.COLUMN_MOD_ID+"));";
         db.execSQL(SQL_CREATE_MODPREREQ_TABLE);
 
-        // creating the student table
+        // create STUDENTS
         final String SQL_CREATE_STUDENT_TABLE = "CREATE TABLE " +
                 studentEntry.TABLE_STUDENTS + "( " +
                 studentEntry.COLUMN_STUD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -66,21 +67,22 @@ public class MyDBHandler extends SQLiteOpenHelper {
                 studentEntry.COLUMN_STUD_EMAIL+ " TEXT NOT NULL " + ");";
         db.execSQL(SQL_CREATE_STUDENT_TABLE);
 
-        // creating the student module table
+        // create STUDENT MODULES
         final String SQL_CREATE_STUDENTMODULE_TABLE = "CREATE TABLE " +
                 studentModuleEntry.TABLE_STUD_MOD + "( " +
                 studentModuleEntry.COLUMN_SM_STUD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 studentModuleEntry.COLUMN__SM_MOD_ID + " TEXT NOT NULL, " +
                 studentModuleEntry.COLUMN__SM_STATUS + " TEXT NOT NULL "  + ");";
         db.execSQL(SQL_CREATE_STUDENTMODULE_TABLE);
-        this.PopulateDB(db);
+        //this.PopulateDB(db);
+
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
     {
         // for updating the database
-        db.execSQL("DROP TABLE IF EXISTS " + modPrereqEntry.TABLE_MOD_PREREQ);
+        db.execSQL("DROP TABLE IF EXISTS " + modPrereqEntry.TABLE_REQUIREMENTS);
         db.execSQL("DROP TABLE IF EXISTS " + modPathsEntry.TABLE_MOD_PATH);
         db.execSQL("DROP TABLE IF EXISTS " + studentModuleEntry.TABLE_STUD_MOD);
         db.execSQL("DROP TABLE IF EXISTS " + pathwaysEntry.TABLE_PATHWAYS);
@@ -131,21 +133,33 @@ public class MyDBHandler extends SQLiteOpenHelper {
         db.insert(modulesEntry.TABLE_MODULES, null, values);
 
         //Add module pre-requirements
-        values = new ContentValues();
         if(prereq!=null) {
             for (String s : prereq) {
-                values.put(modID, s);
+                db.execSQL(
+                        "INSERT INTO "+modPrereqEntry.TABLE_REQUIREMENTS+
+                                "("+modPrereqEntry.COLUMN_REQ_MOD_ID+","+modPrereqEntry.COLUMN_REQ_REQMOD_ID+")" +
+                                " VALUES ('"+modID+"','"+s+"');"
+                );
             }
         }
-        db.insert(modPrereqEntry.TABLE_MOD_PREREQ, null, values);
 
-        values = new ContentValues();
-        if(pathways!=null){
+        Log.d("Pathways", "AddModule: PATHWAYS PRE IF:"+pathways);
+        if(pathways.size()>0){
             for(Integer pathID : pathways){
-                values.put(modID, pathID);
+                Log.d("Pathways", "AddModule: PATHWAYS IS NOT NULL:"+pathways);
+                db.execSQL(
+                        "INSERT INTO "+modPathsEntry.TABLE_MOD_PATH+
+                                "("+modPathsEntry.COLUMN_MP_MOD_ID+","+modPathsEntry.COLUMN_MP_PATH_ID+")" +
+                                " VALUES ('"+modID+"','"+pathID+"');"
+                );
             }
         } else {
-            values.put(modID, 5);
+            Log.d("Pathways", "AddModule: PATHWAYS IS NULL");
+            db.execSQL(
+                    "INSERT INTO "+modPathsEntry.TABLE_MOD_PATH+
+                            "("+modPathsEntry.COLUMN_MP_MOD_ID+","+modPathsEntry.COLUMN_MP_PATH_ID+")" +
+                            " VALUES ('"+modID+"',5);"
+            );
         }
 
     }
@@ -154,12 +168,13 @@ public class MyDBHandler extends SQLiteOpenHelper {
         //Add module to module table
         ContentValues values = new ContentValues();
         values.put(pathwaysEntry.COLUMN_PATH_NAME, pathwayName);
-        db.insert(modulesEntry.TABLE_MODULES, null, values);
+        db.insert(pathwaysEntry.TABLE_PATHWAYS, null, values);
     }
 
 
     //populate
-    public void PopulateDB(SQLiteDatabase db){
+    public void PopulateDB(){
+        SQLiteDatabase db = getWritableDatabase();
         //pathway(5)
         //Network Engineering
         //Software Engineering
@@ -176,48 +191,262 @@ public class MyDBHandler extends SQLiteOpenHelper {
         //Modules()
         //Database, ID, Name, ArrayList<String> Pre-reqs, credits, semester, description, ArrayList<Integer> pathways
         //this.AddModule(db, "", "",null,15, 2,"Info501 desc", null);
-        ArrayList<String> prequeList = new ArrayList<>(Arrays.asList(""));
+
+        // Leaving prequeList empty(null), results in no requirements for the paper
+        // Leaving pathwayList empty(null), results in the module being defined as Core pathway.
+        ArrayList<String> prequeList = new ArrayList<>();
         ArrayList<Integer> pathwayList = new ArrayList<>();
 
-        //Semester 1
-        this.AddModule(db, "COMP501", "IT Operations",15, 1,"COMP501 desc",prequeList, null);
-        this.AddModule(db, "COMP502", "Fundamentals of Programming and Problem Solving",15, 1,"COMP502 desc", prequeList, null);
-        this.AddModule(db, "INFO501", "Professional Practice",15, 1,"INFO501 desc", prequeList, null);
-        this.AddModule(db, "INFO502", "Business Systems Analysis & Design",15, 1,"INFO502 desc", prequeList, null);
+        /*
 
-        //Semester 2
-        this.AddModule(db, "COMP503", "Introduction to Networks (Cisco 1)",15, 2,"COMP503 desc", prequeList, null);
-        this.AddModule(db, "COMP504", "Operating Systems & Systems Support",15, 2,"COMP504 desc", prequeList, null);
-        this.AddModule(db, "INFO503", "Database Principles",15, 2,"INFO503 desc", prequeList, null);
-        this.AddModule(db, "INFO504", "Technical Support",15, 2,"INFO504 desc", prequeList, null);
+         prequeList.add("");
+         pathwayList.add("");
 
-        //Semester 3
-        prequeList = new ArrayList<>(Arrays.asList("COMP502"));
-        this.AddModule(db, "COMP601", "Object Oriented Programming",15, 3,"COMP601 desc",prequeList, null);
-        prequeList = new ArrayList<>(Arrays.asList("INFO503"));
-        this.AddModule(db, "INFO601", "Data-modelling and SQL",15, 3,"INFO601 desc",prequeList, null);
-        prequeList = new ArrayList<>(Arrays.asList(""));
-        this.AddModule(db, "MATH601", "Mathematics for IT",15, 3,"MATH601 desc",prequeList, null);
-        prequeList = new ArrayList<>(Arrays.asList("COMP502","INFO502"));
-        this.AddModule(db, "COMP602", "Web Development",15, 3,"COMP602 desc",prequeList, null);
+        */
 
-        //Semester 4
-        prequeList = new ArrayList<>(Arrays.asList(""));
-        this.AddModule(db, "", "",15, 4,"Info501 desc",prequeList, null);
+        // ------------------------------------------- Semester 1 ------------------------------------------- //
+        // ----- MODULE 1 ----- //
+        this.AddModule(db, "COMP501", "IT Operations",15, 1,"COMP501 desc",prequeList, pathwayList);
+        // ----- MODULE 2 ----- //
+        this.AddModule(db, "COMP502", "Fundamentals of Programming and Problem Solving",15, 1,"COMP502 desc", prequeList, pathwayList);
+        // ----- MODULE 3 ----- //
+        this.AddModule(db, "INFO501", "Professional Practice",15, 1,"INFO501 desc", prequeList, pathwayList);
+        // ----- MODULE 4 ----- //
+        this.AddModule(db, "INFO502", "Business Systems Analysis & Design",15, 1,"INFO502 desc", prequeList, pathwayList);
 
-        //Semester 5
+        // ------------------------------------------- Semester 2 ------------------------------------------- //
+        // ----- MODULE 1 ----- //
+        this.AddModule(db, "COMP503", "Introduction to Networks (Cisco 1)",15, 2,"COMP503 desc", prequeList, pathwayList);
+        // ----- MODULE 2 ----- //
+        this.AddModule(db, "COMP504", "Operating Systems & Systems Support",15, 2,"COMP504 desc", prequeList, pathwayList);
+        // ----- MODULE 3 ----- //
+        this.AddModule(db, "INFO503", "Database Principles",15, 2,"INFO503 desc", prequeList, pathwayList);
+        // ----- MODULE 4 ----- //
+        this.AddModule(db, "INFO504", "Technical Support",15, 2,"INFO504 desc", prequeList, pathwayList);
 
-        //Semester 6
+        // ------------------------------------------- Semester 3 ------------------------------------------- //
+        // ----- MODULE 1 ----- //
+        prequeList = new ArrayList<>();
+        prequeList.add("COMP502");
+        this.AddModule(db, "COMP601", "Object Oriented Programming",15, 3,"COMP601 desc",prequeList, pathwayList);
+        // ----- MODULE 2 ----- //
+        prequeList = new ArrayList<>();
+        prequeList.add("INFO503");
+        this.AddModule(db, "INFO601", "Data-modelling and SQL",15, 3,"INFO601 desc",prequeList, pathwayList);
+        // ----- MODULE 3 ----- //
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "MATH601", "Mathematics for IT",15, 3,"MATH601 desc",prequeList, pathwayList);
+        // ----- MODULE 4 ----- //
+        prequeList = new ArrayList<>();
+        prequeList.add("COMP502");
+        prequeList.add("INFO502");
+        this.AddModule(db, "COMP602", "Web Development",15, 3,"COMP602 desc",prequeList, pathwayList);
 
-        //Path mods
+        // ------------------------------------------- Semester 4 ------------------------------------------- //
+        // ----- MODULE 1 ----- //
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "INFO602", "Business, Interpersonal Communications & Technical Writing",15, 4,"INFO602 desc",prequeList, pathwayList);
+
+        // ----- MODULE 2 ----- //
+        // Software & Database
+        pathwayList = new ArrayList<>();
+        pathwayList.add(1);
+        pathwayList.add(3);
+        prequeList = new ArrayList<>();
+        prequeList.add("COMP601");
+        prequeList.add("MATH601");
+        this.AddModule(db, "COMP605", "Data Structures and Algorithms",15, 4,"COMP605 desc",prequeList, pathwayList);
+
+        // Networking
+        pathwayList = new ArrayList<>();
+        pathwayList.add(2);
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "COMP615", "Data Centre Infrastructure",15, 4,"COMP615 desc",prequeList, pathwayList);
+
+        // Multimedia
+        pathwayList = new ArrayList<>();
+        pathwayList.add(4);
+        prequeList = new ArrayList<>();
+        prequeList.add("COMP602");
+        this.AddModule(db, "COMP603", "The Web Environment",15, 4,"COMP603 desc",prequeList, pathwayList);
+
+        // ----- MODULE 3 ----- //
+
+        // Software
+        pathwayList = new ArrayList<>();
+        pathwayList.add(1);
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "COMP609", "Applications Development",15, 4,"COMP609 desc",prequeList, pathwayList);
+
+        // Networking
+        pathwayList = new ArrayList<>();
+        pathwayList.add(2);
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "INFO603", "Systems Administration",15, 4,"INFO603 desc",prequeList, pathwayList);
+
+        // Database & Multi media
+        pathwayList = new ArrayList<>();
+        pathwayList.add(3);
+        pathwayList.add(4);
+        prequeList = new ArrayList<>();
+        prequeList.add("COMP602");
+        this.AddModule(db, "COMP606", "Web Programming",15, 4,"COMP606 desc",prequeList, pathwayList);
+
+        // ----- MODULE 4 ----- //
+
+        // Software
+        pathwayList = new ArrayList<>();
+        pathwayList.add(1);
+        prequeList = new ArrayList<>();
+        prequeList.add("MATH601");
+        this.AddModule(db, "MATH602", "Mathematics for Programming",15, 4,"MATH602 desc",prequeList, pathwayList);
+
+        // Networking
+        pathwayList = new ArrayList<>();
+        pathwayList.add(2);
+        prequeList = new ArrayList<>();
+        prequeList.add("COMP503");
+        this.AddModule(db, "COMP604", "Routing and Switching Essentials",15, 4,"COMP604 desc",prequeList, pathwayList);
+
+        // Database
+        pathwayList = new ArrayList<>();
+        pathwayList.add(3);
+        prequeList = new ArrayList<>();
+        prequeList.add("INFO503");
+        this.AddModule(db, "INFO604", "Database Systems",15, 4,"INFO604 desc",prequeList, pathwayList);
+
+        // Multimedia
+        pathwayList = new ArrayList<>();
+        pathwayList.add(4);
+        prequeList = new ArrayList<>();
+        prequeList.add("COMP602");
+        this.AddModule(db, "COMP607", "Visual Effects and Animation",15, 4,"COMP607 desc",prequeList, pathwayList);
+
+        // ------------------------------------------- Semester 5 ------------------------------------------- //
+
+        // ----- MODULE 1 ----- //
+
+        // Software & Database
+        pathwayList = new ArrayList<>();
+        pathwayList.add(1);
+        pathwayList.add(3);
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "INFO704", "Data-Warehousing and Business Intelligence",15, 5,"INFO704 desc",prequeList, pathwayList);
+
+        // Networking
+        pathwayList = new ArrayList<>();
+        pathwayList.add(2);
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "COMP701", "Advanced Networking",15, 5,"COMP701 desc",prequeList, pathwayList);
+
+        // Multimedia
+        pathwayList = new ArrayList<>();
+        pathwayList.add(4);
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "INFO709", "Human Computer Interaction",15, 5,"INFO709 desc",prequeList, pathwayList);
+
+        // ----- MODULE 2 ----- //
+
+        // Software
+        pathwayList = new ArrayList<>();
+        pathwayList.add(1);
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "COMP707", "Principles of Software Testing",15, 5,"COMP707 desc",prequeList, pathwayList);
+
+        // Networking & Multimedia
+        pathwayList = new ArrayList<>();
+        pathwayList.add(2);
+        pathwayList.add(4);
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "INFO702", "Cyber-Security",15, 5,"INFO702 desc",prequeList, pathwayList);
+
+        // Database
+        pathwayList = new ArrayList<>();
+        pathwayList.add(3);
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "INFO706", "Database Front-End Applications",15, 5,"INFO706 desc",prequeList, pathwayList);
+
+        // ----- MODULE 3 ----- //
+
+        // Software & Database & Multimedia
+        pathwayList = new ArrayList<>();
+        pathwayList.add(1);
+        pathwayList.add(3);
+        pathwayList.add(4);
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "COMP709", "Mobile Applications Development",15, 5,"COMP709 desc",prequeList, pathwayList);
+
+        // Networking
+        pathwayList = new ArrayList<>();
+        pathwayList.add(2);
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "COMP704", "Network Security",15, 5,"COMP704 desc",prequeList, pathwayList);
+
+        // ----- MODULE 4 ----- //
+
+        // Software
+        pathwayList = new ArrayList<>();
+        pathwayList.add(1);
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "COMP706", "Game Development",15, 5,"COMP706 desc",prequeList, pathwayList);
+
+        // Networking
+        pathwayList = new ArrayList<>();
+        pathwayList.add(2);
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "COMP702", "Scaling Networks",15, 5,"COMP702 desc",prequeList, pathwayList);
+
+        // Database
+        pathwayList = new ArrayList<>();
+        pathwayList.add(3);
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "INFO707", "Cloud Server Databases",15, 5,"INFO707 desc",prequeList, pathwayList);
+
+        // Multimedia
+        pathwayList = new ArrayList<>();
+        pathwayList.add(4);
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "COMP710", "Web Applications Development",15, 5,"COMP710 desc",prequeList, pathwayList);
 
 
-        //Close db
+
+        // ------------------------------------------- Semester 6 ------------------------------------------- //
+
+        // ----- MODULE 1 ----- //
+
+        // Core
+        pathwayList = new ArrayList<>();
+        prequeList = new ArrayList<>();
+        prequeList.add("INFO602");
+        this.AddModule(db, "BIZM701", "Business Essentials for IT Professionals",15, 6,"BIZM701 desc",prequeList, pathwayList);
+
+        // ----- MODULE 2 ----- //
+
+        // Software & Database
+        pathwayList = new ArrayList<>();
+        pathwayList.add(1);
+        pathwayList.add(3);
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "INFO703", "Big Data and Analytics",15, 6,"INFO703 desc",prequeList, pathwayList);
+
+        // Networking
+        pathwayList = new ArrayList<>();
+        pathwayList.add(2);
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "COMP705", "Connecting Networks",15, 6,"COMP705 desc",prequeList, pathwayList);
+
+        // Multimedia
+        pathwayList = new ArrayList<>();
+        pathwayList.add(4);
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "INFO708", "Data Visualisation",15, 6,"INFO708 desc",prequeList, pathwayList);
+        // ----- MODULE 3 ----- //
+        pathwayList = new ArrayList<>();
+        prequeList = new ArrayList<>();
+        this.AddModule(db, "PROJ", "Capstone Project/Internship/Design Factory",30, 6,"PROJ desc",prequeList, pathwayList);
+        // ----- MODULE 4 ----- //
+        // None: due to 30 credit paper
+
         db.close();
     }
-
-
-
-
-
 }
