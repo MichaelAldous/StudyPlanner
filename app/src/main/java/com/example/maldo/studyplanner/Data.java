@@ -56,8 +56,8 @@ public class Data {
     {
         public static final String TABLE_STUD_MOD = "stud_mod";
         public static final String COLUMN_SM_STUD_ID = "_sm_stud_id"; // PK FK
-        public static final String COLUMN__SM_MOD_ID = "_sm_mod_id"; // PK FK
-        public static final String COLUMN__SM_STATUS = "_sm_status"; //"active", "inactive", "passed"
+        public static final String COLUMN_SM_MOD_ID = "_sm_mod_id"; // PK FK
+        public static final String COLUMN_SM_STATUS = "_sm_status"; //"active", "inactive", "passed"
     }
 
     //    // PATHWAYS TABLE

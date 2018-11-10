@@ -61,8 +61,8 @@ public class MyEditorDBHandler extends SQLiteOpenHelper {
         final String SQL_CREATE_STUDENTMODULE_TABLE = "CREATE TABLE " +
                 studentModuleEntry.TABLE_STUD_MOD + "( " +
                 studentModuleEntry.COLUMN_SM_STUD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                studentModuleEntry.COLUMN__SM_MOD_ID + " TEXT NOT NULL, " +
-                studentModuleEntry.COLUMN__SM_STATUS + " TEXT NOT NULL "  + ");";
+                studentModuleEntry.COLUMN_SM_MOD_ID + " TEXT NOT NULL, " +
+                studentModuleEntry.COLUMN_SM_STATUS + " TEXT NOT NULL "  + ");";
         db.execSQL(SQL_CREATE_STUDENTMODULE_TABLE);
     }
 

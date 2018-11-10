@@ -54,13 +54,17 @@ public class ActivityManageStudents extends AppCompatActivity {
                                     Matcher matcher = Patterns.EMAIL_ADDRESS.matcher(email);
                                     if(matcher.matches()){
                                         // Add student to DB
-                                        int studentIDPass = Integer.parseInt(studIDString);
+                                        // TODO: Check if student exists
                                         MyDBHandler handler = new MyDBHandler(getApplicationContext());
-                                        handler.AddStudent(studentIDPass,fName,lName,email);
-                                        // Then populate stud_mod table
-
-                                        Toast.makeText(getApplicationContext(), "Student Added",
-                                                Toast.LENGTH_LONG).show();
+                                        if(handler.hasObject(Data.studentEntry.TABLE_STUDENTS,Data.studentEntry.COLUMN_STUD_ID,studIDString)){
+                                            Toast.makeText(getApplicationContext(), "Student Already Exists",
+                                                    Toast.LENGTH_LONG).show();
+                                        } else {
+                                            int studentIDPass = Integer.parseInt(studIDString);
+                                            handler.AddStudent(studentIDPass,fName,lName,email);
+                                            Toast.makeText(getApplicationContext(), "Student Added",
+                                                    Toast.LENGTH_LONG).show();
+                                        }
                                     } else {
                                         // Please enter a valid email
                                         Toast.makeText(getApplicationContext(), "Please enter a valid email",
@@ -104,38 +108,37 @@ public class ActivityManageStudents extends AppCompatActivity {
                 if(studIDString!=null){
                     try{
                         // If studID is number
-                        Integer studID = Integer.parseInt(studIDString);
+                        final Integer studID = Integer.parseInt(studIDString);
                         // TODO - SEARCH FOR STUDENT IN DB
+                        final MyDBHandler handler = new MyDBHandler(getApplicationContext());
 
-                        if (1==1){
-                            Builder builder = new Builder(getApplicationContext());
+                        if(handler.hasObject(Data.studentEntry.TABLE_STUDENTS,Data.studentEntry.COLUMN_STUD_ID,studIDString)){
+                            AlertDialog.Builder builder = new AlertDialog.Builder(ActivityManageStudents.this);
                             builder.setCancelable(true);
-                            builder.setTitle("Delete Student");
-                            builder.setMessage("TODO: student first name + last name");
+                            builder.setTitle("Remove student?");
+                            builder.setMessage("Are you sure you want to remove student: " + studID + "?");
                             builder.setPositiveButton("Confirm",
-                                    new DialogInterface.OnClickListener() {
+                                    new DialogInterface.OnClickListener(){
                                         @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            // DELETE STUDENT FROM DATABASE
-                                            Toast.makeText(getApplicationContext(), "Student deleted",
+                                        public void onClick(DialogInterface dialogInterface, int which){
+                                            handler.RemoveStudent(studID);
+                                            Toast.makeText(getApplicationContext(), "Student Deleted",
                                                     Toast.LENGTH_LONG).show();
                                         }
                                     });
-                            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
+                            builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener(){
+                                public void onClick(DialogInterface dialogInterface, int which){
+                                    Toast.makeText(getApplicationContext(), "Cancelled",
+                                            Toast.LENGTH_LONG).show();
                                 }
                             });
 
                             AlertDialog dialog = builder.create();
                             dialog.show();
 
-
-
-
                         } else {
-                            // student not found
-                            Toast.makeText(getApplicationContext(), "Student not found",
+                            int studentIDPass = Integer.parseInt(studIDString);
+                            Toast.makeText(getApplicationContext(), "Student does not exist",
                                     Toast.LENGTH_LONG).show();
                         }
 

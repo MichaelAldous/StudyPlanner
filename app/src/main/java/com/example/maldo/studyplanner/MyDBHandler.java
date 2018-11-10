@@ -1,6 +1,7 @@
 package com.example.maldo.studyplanner;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.content.Context;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -10,6 +11,8 @@ import com.example.maldo.studyplanner.Data.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Queue;
 
 public class MyDBHandler extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
@@ -61,7 +64,7 @@ public class MyDBHandler extends SQLiteOpenHelper {
         // create STUDENTS
         final String SQL_CREATE_STUDENT_TABLE = "CREATE TABLE " +
                 studentEntry.TABLE_STUDENTS + "( " +
-                studentEntry.COLUMN_STUD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                studentEntry.COLUMN_STUD_ID + " INTEGER PRIMARY KEY, " +
                 studentEntry.COLUMN_STUD_FNAME+ " TEXT NOT NULL, " +
                 studentEntry.COLUMN_STUD_LNAME+ " TEXT NOT NULL, " +
                 studentEntry.COLUMN_STUD_EMAIL+ " TEXT NOT NULL " + ");";
@@ -70,9 +73,12 @@ public class MyDBHandler extends SQLiteOpenHelper {
         // create STUDENT MODULES
         final String SQL_CREATE_STUDENTMODULE_TABLE = "CREATE TABLE " +
                 studentModuleEntry.TABLE_STUD_MOD + "( " +
-                studentModuleEntry.COLUMN_SM_STUD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                studentModuleEntry.COLUMN__SM_MOD_ID + " TEXT NOT NULL, " +
-                studentModuleEntry.COLUMN__SM_STATUS + " TEXT NOT NULL "  + ");";
+                studentModuleEntry.COLUMN_SM_STUD_ID + " INTEGER, " +
+                studentModuleEntry.COLUMN_SM_MOD_ID + " TEXT NOT NULL, " +
+                studentModuleEntry.COLUMN_SM_STATUS + " TEXT NOT NULL, "  +
+                "PRIMARY KEY("+studentModuleEntry.COLUMN_SM_STUD_ID +","+ studentModuleEntry.COLUMN_SM_MOD_ID+"), "+
+                "FOREIGN KEY("+studentModuleEntry.COLUMN_SM_STUD_ID +") REFERENCES "+studentEntry.TABLE_STUDENTS+"("+studentEntry.COLUMN_STUD_ID+"),"+
+                "FOREIGN KEY("+studentModuleEntry.COLUMN_SM_MOD_ID+") REFERENCES "+modulesEntry.TABLE_MODULES+"("+modulesEntry.COLUMN_MOD_ID+"));";
         db.execSQL(SQL_CREATE_STUDENTMODULE_TABLE);
         //this.PopulateDB(db);
 
@@ -99,20 +105,78 @@ public class MyDBHandler extends SQLiteOpenHelper {
         values.put(studentEntry.COLUMN_STUD_EMAIL, email);
         SQLiteDatabase db = getWritableDatabase();
         db.insert(studentEntry.TABLE_STUDENTS, null, values);
+        //Add student_mod here
+        Cursor cursor = db.rawQuery("Select * from " + modulesEntry.TABLE_MODULES, null);
+        List<String> fileName = new ArrayList<>();
+        if (cursor.moveToFirst()){
+            db.execSQL("INSERT INTO " + studentModuleEntry.TABLE_STUD_MOD +
+                    "("+ studentModuleEntry.COLUMN_SM_STUD_ID + "," + studentModuleEntry.COLUMN_SM_MOD_ID + ","+ studentModuleEntry.COLUMN_SM_STATUS +
+                    ") VALUES (" + studID +",'"+cursor.getString(cursor.getColumnIndex(modulesEntry.COLUMN_MOD_ID))+ "','nyp');"
+            );
+            //fileName.add(cursor.getString(cursor.getColumnIndex(modulesEntry.COLUMN_MOD_ID)));
+            while (cursor.moveToNext()){
+                db.execSQL("INSERT INTO " + studentModuleEntry.TABLE_STUD_MOD +
+                        "("+ studentModuleEntry.COLUMN_SM_STUD_ID + "," + studentModuleEntry.COLUMN_SM_MOD_ID + ","+ studentModuleEntry.COLUMN_SM_STATUS +
+                        ") VALUES (" + studID +",'"+cursor.getString(cursor.getColumnIndex(modulesEntry.COLUMN_MOD_ID))+ "','nyp');"
+                );
+                //fileName.add(cursor.getString(cursor.getColumnIndex(modulesEntry.COLUMN_MOD_ID)));
+            }
+        }
+
         db.close();
     }
 
     //Remove student
     public void RemoveStudent(int studID){
         //Remove from mod_student
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL("DELETE FROM " + studentModuleEntry.TABLE_STUD_MOD +
+                " WHERE " + studentModuleEntry.COLUMN_SM_STUD_ID + " = " + studID);
+        db.execSQL("DELETE FROM " + studentEntry.TABLE_STUDENTS +
+                " WHERE " + studentEntry.COLUMN_STUD_ID + " = " + studID);
 
-        //Remove student
+        db.close();
     }
-    //Search students?
-    public void SearchStudents(){
-        //Search student table
-        //return student name + id
+
+    //Used to check if student exists. For both adding and delete students.
+    public boolean hasObject(String tableName, String dbfield, String fieldValue){
+        SQLiteDatabase db = getReadableDatabase();
+        String query = "SELECT * from " + tableName + " where " + dbfield + " = '" + fieldValue +"'";
+        Cursor cursor = db.rawQuery(query, null);
+        if(cursor.getCount()<=0){
+            cursor.close();
+            db.close();
+            return false;
+        }
+        cursor.close();
+        db.close();
+        return true;
     }
+
+    public ArrayList<Student> getListOfStudents(Integer studID){
+        ArrayList<Student> studentList = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        String query;
+        if(studID==null){
+            query = "SELECT * from " + studentEntry.TABLE_STUDENTS +";";
+        } else {
+            query = "SELECT * from " + studentEntry.TABLE_STUDENTS + " where " + studentEntry.COLUMN_STUD_ID + " LIKE '%" + studID + "%';";
+        }
+        Cursor cursor = db.rawQuery(query, null);
+        if(cursor != null){
+            if (cursor.moveToFirst()){
+                do {
+                    Integer id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(studentEntry.COLUMN_STUD_ID)));
+                    String fname = cursor.getString(cursor.getColumnIndex(studentEntry.COLUMN_STUD_FNAME));
+                    String lname = cursor.getString(cursor.getColumnIndex(studentEntry.COLUMN_STUD_LNAME));
+                    String email = cursor.getString(cursor.getColumnIndex(studentEntry.COLUMN_STUD_EMAIL));
+                    studentList.add(new Student(id,fname,lname,email));
+                } while(cursor.moveToNext());
+            }
+        }
+        return(studentList);
+    }
+
 
     public void GetStudentModules(){
         //Search for student modules + returns name and if they've passed etc.
