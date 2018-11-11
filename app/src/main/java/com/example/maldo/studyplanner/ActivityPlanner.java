@@ -18,7 +18,7 @@ import java.util.List;
 public class ActivityPlanner extends AppCompatActivity {
 
     MyDBHandler dbHandler = new MyDBHandler(this);
-    ArrayList<Module> moduleList = new ArrayList<>();
+    public static ArrayList<Module> moduleList = new ArrayList<>();
     private ListView moduleListView ;
     private PlannerModuleAdapter plannerModuleAdapter;
 
@@ -65,5 +65,11 @@ public class ActivityPlanner extends AppCompatActivity {
 
 
         Log.d("REFRESH", "refreshStudentList: " + moduleList);
+    }
+
+    public boolean requirementsMet(){
+        boolean isMet = false;
+        //if no requirements isMet = true
+        return isMet;
     }
 }

@@ -23,7 +23,7 @@ public class ActivitySelectStudent extends AppCompatActivity{
     MyDBHandler dbHandler = new MyDBHandler(this);
     //private ListView studentListView = findViewById(R.id.studentList);
     private EditText studID;
-    ArrayList<Student> studentList;
+    public static ArrayList<Student> studentList;
     private SelectStudentAdapter selectStudentAdapter;
     private ListView studentListView;
 
