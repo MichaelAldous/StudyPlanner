@@ -21,9 +21,7 @@ public class Student {
         return this.student_lname;
     }
 
-    public int getStudentId(){
-        return this.student_id;
-    }
+    public Integer getStudentId(){ return this.student_id; }
 
     public String getStudentEmail(){
         return this.student_email;

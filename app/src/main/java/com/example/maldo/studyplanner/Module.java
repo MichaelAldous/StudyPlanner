@@ -1,19 +1,23 @@
 package com.example.maldo.studyplanner;
 
+import java.util.ArrayList;
+
 public class Module {
     private String id;
     private String name;
     private String description;
-    private String[] prereqs;
-    private String semester;
+    private ArrayList<String> prereqs;
+    private ArrayList<String> pathways;
+    private Integer semester;
     private Integer credits;
     private String status;
 
-    public Module(String id,String name, String description, String[] prereqs, String semester, Integer credits, String status){
+    public Module(String id,String name, String description, ArrayList<String> prereqs, ArrayList<String> paths, Integer semester, Integer credits, String status){
         this.id = id;
         this.name = name;
         this.description = description;
         this.prereqs = prereqs;
+        this.pathways = paths;
         this.semester = semester;
         this.credits = credits;
         this.status = status;
@@ -28,10 +32,8 @@ public class Module {
     public String getModuleDescription(){
         return this.description;
     }
-    public String[] getModulePrereqs(){
-        return this.prereqs;
-    }
-    public String getModuleSemester(){
+    public ArrayList<String> getModulePrereqs(){ return this.prereqs; }
+    public Integer getModuleSemester(){
         return this.semester;
     }
     public Integer getModuleCredits() {

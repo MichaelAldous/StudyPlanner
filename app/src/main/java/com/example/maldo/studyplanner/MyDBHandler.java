@@ -121,8 +121,8 @@ public class MyDBHandler extends SQLiteOpenHelper {
                 );
                 //fileName.add(cursor.getString(cursor.getColumnIndex(modulesEntry.COLUMN_MOD_ID)));
             }
+            cursor.close();
         }
-
         db.close();
     }
 
@@ -157,6 +157,7 @@ public class MyDBHandler extends SQLiteOpenHelper {
         ArrayList<Student> studentList = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
         String query;
+
         if(studID==null){
             query = "SELECT * from " + studentEntry.TABLE_STUDENTS +";";
         } else {
@@ -166,20 +167,149 @@ public class MyDBHandler extends SQLiteOpenHelper {
         if(cursor != null){
             if (cursor.moveToFirst()){
                 do {
-                    Integer id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(studentEntry.COLUMN_STUD_ID)));
+                    Integer studId = Integer.parseInt(cursor.getString(cursor.getColumnIndex(studentEntry.COLUMN_STUD_ID)));
                     String fname = cursor.getString(cursor.getColumnIndex(studentEntry.COLUMN_STUD_FNAME));
                     String lname = cursor.getString(cursor.getColumnIndex(studentEntry.COLUMN_STUD_LNAME));
                     String email = cursor.getString(cursor.getColumnIndex(studentEntry.COLUMN_STUD_EMAIL));
-                    studentList.add(new Student(id,fname,lname,email));
+                    studentList.add(new Student(studId,fname,lname,email));
                 } while(cursor.moveToNext());
             }
+            cursor.close();
         }
+        db.close();
         return(studentList);
     }
 
+    //Get students modules pathways
+    //insert into pathways arraylist
 
-    public void GetStudentModules(){
-        //Search for student modules + returns name and if they've passed etc.
+
+    public ArrayList<Module> GetStudentModules(Integer studID){
+        ArrayList<Module> moduleList = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        //String query = "SELECT * FROM " +
+        //              studentModuleEntry.TABLE_STUD_MOD + "," +
+        //              modulesEntry.TABLE_MODULES +
+        //              " WHERE " +
+        //              studentModuleEntry.COLUMN_SM_STUD_ID + "=" + studID +";";
+
+        String query = "Select * FROM " +
+                studentModuleEntry.TABLE_STUD_MOD + " JOIN " + modulesEntry.TABLE_MODULES + " ON " +
+                        studentModuleEntry.COLUMN_SM_MOD_ID + " = " + modulesEntry.COLUMN_MOD_ID +
+                " WHERE " + studentModuleEntry.COLUMN_SM_STUD_ID + " = '" + studID + "';";
+
+
+        Cursor cursor = db.rawQuery(query, null);
+        if(cursor != null){
+            if (cursor.moveToFirst()){
+                do {
+                    String modId = cursor.getString(cursor.getColumnIndex(studentModuleEntry.COLUMN_SM_MOD_ID));
+                    String modName  = cursor.getString(cursor.getColumnIndex(modulesEntry.COLUMN_MOD_NAME));
+                    String modDesc = cursor.getString(cursor.getColumnIndex(modulesEntry.COLUMN_MOD_DESC));
+                    Integer modCredits = cursor.getInt(cursor.getColumnIndex(modulesEntry.COLUMN_MOD_CRED));
+                    String modStatus = cursor.getString(cursor.getColumnIndex(studentModuleEntry.COLUMN_SM_STATUS));
+                    Integer modSemester = cursor.getInt(cursor.getColumnIndex(modulesEntry.COLUMN_MP_SEMESTER));
+                    ArrayList<String> modPrereq = GetModPrereq(modId);
+                    ArrayList<String> modPath = GetModPaths(modId);
+
+                    Log.d("REFRESH", "GetStudentModules: " + modId + ", " +modStatus + ", " + modName  + ", " + modDesc  + ", " + modCredits  + ", " + modSemester + ", " + modPrereq + ", " + modPath);
+                    moduleList.add(new Module(modId, modName, modDesc, modPrereq, modPath, modSemester, modCredits, modStatus));
+                } while(cursor.moveToNext());
+            }
+            cursor.close();
+        }
+        db.close();
+        Log.d("REFRESH", "GetStudentModules: " + moduleList);
+        return moduleList;
+    }
+
+    public ArrayList<String> GetModPaths(String modID){
+        ArrayList<String> modPaths = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+
+        //String query = " SELECT "+ pathwaysEntry.COLUMN_PATH_NAME +
+        //        " FROM " + pathwaysEntry.TABLE_PATHWAYS +
+        //        " WHERE " + pathwaysEntry.COLUMN_PATH_ID + " = '" + modID + "';";
+
+        String query = " SELECT * FROM "
+                + pathwaysEntry.TABLE_PATHWAYS + " JOIN " + modPathsEntry.TABLE_MOD_PATH + " ON " +
+                pathwaysEntry.COLUMN_PATH_ID + " = " + modPathsEntry.COLUMN_MP_PATH_ID +
+                " WHERE " + modPathsEntry.COLUMN_MP_MOD_ID + " = '" + modID + "';";
+
+        Cursor cursor = db.rawQuery(query, null);
+        if(cursor != null){
+            if (cursor.moveToFirst()){
+                do {
+                    String paths = cursor.getString(cursor.getColumnIndex(pathwaysEntry.COLUMN_PATH_NAME));
+                    modPaths.add(paths);
+                } while(cursor.moveToNext());
+            }
+            cursor.close();
+        }
+        db.close();
+        return modPaths;
+    }
+
+    public ArrayList<String> GetModPrereq(String modID){
+        ArrayList<String> modPrereq = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+
+        //String query = " SELECT "+ modPathsEntry.COLUMN_MP_PATH_ID +
+        //       " FROM " + modPathsEntry.TABLE_MOD_PATH +
+        //       " WHERE " + modPathsEntry.COLUMN_MP_MOD_ID + " = (" + modID + ";";
+
+        String query = " SELECT "+ modPrereqEntry.COLUMN_REQ_REQMOD_ID +" FROM " + modPrereqEntry.TABLE_REQUIREMENTS +
+                " WHERE " + modPrereqEntry.COLUMN_REQ_MOD_ID + " = '"  + modID + "';";
+
+        Cursor cursor = db.rawQuery(query, null);
+        if(cursor != null){
+            if (cursor.moveToFirst()){
+                do {
+                    String requiredMod = cursor.getString(cursor.getColumnIndex(modPrereqEntry.COLUMN_REQ_REQMOD_ID));
+                    modPrereq.add(requiredMod);
+                } while(cursor.moveToNext());
+            }
+            cursor.close();
+        }
+        db.close();
+        return modPrereq;
+    }
+
+    public ArrayList<String> GetPathways(){
+        ArrayList<String> pathwayList = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        String query = " SELECT * FROM " + pathwaysEntry.TABLE_PATHWAYS +
+                " WHERE " + pathwaysEntry.COLUMN_PATH_NAME + " != " + "'Core';";
+        Cursor cursor = db.rawQuery(query, null);
+        if(cursor != null){
+            if (cursor.moveToFirst()){
+                do {
+                    String pathwayString = cursor.getString(cursor.getColumnIndex(pathwaysEntry.COLUMN_PATH_NAME));
+                    pathwayList.add(pathwayString);
+                } while(cursor.moveToNext());
+            }
+            cursor.close();
+        }
+        db.close();
+        return pathwayList;
+    }
+
+    public ArrayList<Integer> GetSemesters(){
+        ArrayList<Integer> semesterList = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        String query = " SELECT DISTINCT " + modulesEntry.COLUMN_MP_SEMESTER + " FROM " + modulesEntry.TABLE_MODULES + ";";
+        Cursor cursor = db.rawQuery(query, null);
+        if(cursor != null){
+            if (cursor.moveToFirst()){
+                do {
+                    Integer semesterInt = cursor.getInt(cursor.getColumnIndex(modulesEntry.COLUMN_MP_SEMESTER));
+                    semesterList.add(semesterInt);
+                } while(cursor.moveToNext());
+            }
+            cursor.close();
+        }
+        db.close();
+        return semesterList;
     }
 
     public void StudentModUpdate(){
@@ -225,7 +355,6 @@ public class MyDBHandler extends SQLiteOpenHelper {
                             " VALUES ('"+modID+"',5);"
             );
         }
-
     }
 
     public void AddPathways(SQLiteDatabase db, String pathwayName){
