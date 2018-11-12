@@ -1,10 +1,13 @@
 package com.example.maldo.studyplanner;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -14,13 +17,17 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+//TODO: Make background colour of modules update based on status and prerequirements status
 
 public class ActivityPlanner extends AppCompatActivity {
 
     MyDBHandler dbHandler = new MyDBHandler(this);
     public static ArrayList<Module> moduleList = new ArrayList<>();
+    public static ArrayList<Module> spinnerList = new ArrayList<>();
     private ListView moduleListView ;
     private PlannerModuleAdapter plannerModuleAdapter;
+    private String pathway;
+    private Integer semester;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,47 +36,136 @@ public class ActivityPlanner extends AppCompatActivity {
 
         moduleListView = findViewById(R.id.moduleListView);
         Intent intent = getIntent();
-        String studID = intent.getExtras().getString("extrasID");
+        Integer studID = Integer.parseInt(intent.getExtras().getString("extrasID"));
         String studFname = intent.getExtras().getString("extrasFname");
         String studLname = intent.getExtras().getString("extrasLname");
         String studEmail = intent.getExtras().getString("extrasEmail");
 
-        Spinner pathwaySpinner = findViewById(R.id.spinner_pathways);
+        final Spinner pathwaySpinner = findViewById(R.id.spinner_pathways);
         ArrayList<String> pathwayList = dbHandler.GetPathways();
         ArrayAdapter<String> pathwayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, pathwayList);
         pathwaySpinner.setAdapter(pathwayAdapter);
 
         Log.d("REFRESH", "onClick: GETPATHWAYS " + pathwayList);
-        Spinner semesterSpinner = findViewById(R.id.spinner_semester);
+        final Spinner semesterSpinner = findViewById(R.id.spinner_semester);
         ArrayList<Integer> semesterList = dbHandler.GetSemesters();
         ArrayAdapter<Integer> semesterAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, semesterList);
         semesterSpinner.setAdapter(semesterAdapter);
 
         Log.d("REFRESH", "onClick: studID " + studID);
-        refreshModuleList(Integer.parseInt(studID));
+
+        moduleList = dbHandler.GetStudentModules(studID);
+        pathway = pathwaySpinner.getSelectedItem().toString();
+        semester = Integer.parseInt(semesterSpinner.getSelectedItem().toString());
+        refreshModuleList(pathway, semester);
+
+        // Pathway selector
+        pathwaySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                pathway = pathwaySpinner.getSelectedItem().toString();
+                refreshModuleList(pathway, semester);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+        // Semester selector
+        semesterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                semester = Integer.parseInt(semesterSpinner.getSelectedItem().toString());
+                refreshModuleList(pathway, semester);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+        // Hold down to set module to passed or nyp
+        //TODO: update database, set background colours, passed = green, active = white
+        moduleListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Module module = (Module) parent.getAdapter().getItem(position);
+                if(module.getModuleStatus().matches("nyp")&&(requirementsMet(module))){
+                    module.setModuleStatus("passed");
+                    parent.getChildAt(position).setBackgroundColor(Color.GREEN);
+                    Toast.makeText(getApplicationContext(), "MODULE SET TO PASSED",
+                            Toast.LENGTH_LONG).show();
+                } else {
+                    module.setModuleStatus("nyp");
+                    parent.getChildAt(position).setBackgroundColor(Color.WHITE);
+                    Toast.makeText(getApplicationContext(), "MODULE SET TO NYP",
+                            Toast.LENGTH_LONG).show();
+                }
+                return false;
+            }
+        });
 
     }
 
-    public void refreshModuleList(Integer id){
-        moduleList = dbHandler.GetStudentModules(id);
-        plannerModuleAdapter = new PlannerModuleAdapter(this, moduleList);
+    public void refreshModuleList(String pathway, Integer semester){
+        spinnerList.clear();
+        for(Module m: moduleList ){
+            if(m.getModuleSemester().equals(semester) && (m.getPathways().contains(pathway) || m.getPathways().contains("Core"))){
+                spinnerList.add(m);
+            }
+        }
+        plannerModuleAdapter = new PlannerModuleAdapter(this, spinnerList);
         moduleListView.setAdapter(plannerModuleAdapter);
-        Log.d("REFRESH", "refreshStudentList: " + moduleList);
+        Log.d("REFRESH", "refreshStudentList: " + spinnerList);
 
         plannerModuleAdapter.notifyDataSetChanged();
 
         if(moduleListView.getAdapter().getCount() == 0){
-            Toast.makeText(getApplicationContext(), "No students found",
+            Toast.makeText(getApplicationContext(), "Error, no modules found. Please recreate student.",
                     Toast.LENGTH_LONG).show();
         }
-
-
-        Log.d("REFRESH", "refreshStudentList: " + moduleList);
+        Log.d("REFRESH", "refreshStudentList: " + spinnerList);
     }
 
-    public boolean requirementsMet(){
+    // Used for onItemLongClick, to check if requirements met, before changing Module to passed
+    public boolean requirementsMet(Module module){
         boolean isMet = false;
+        ArrayList<String> prereqs = module.getModulePrereqs();
+        if(prereqs.size()==0){
+            isMet = true;
+        } else {
+            for(String required: prereqs){
+                Log.d("REFRESH", "required: "+ required);
+                Module requiredModule = findMod(required);
+                Log.d("REFRESH", "requiredModule: "+ requiredModule);
+                if(requiredModule.getModuleStatus().equals("passed")){
+                    isMet = true;
+                    Log.d("REFRESH", "If module shit = passed: ");
+                } else {
+                    Log.d("REFRESH", "If module shit = npy: ");
+                    isMet = false;
+                    return isMet;
+                }
+            }
+        }
         //if no requirements isMet = true
         return isMet;
+    }
+
+    // Used by requirementsMet to get Module object
+    private Module findMod(String modID){
+        for(Module mod: moduleList){
+            if(mod.getModuleId().equals(modID)){
+                return mod;
+            }
+        }
+        return null;
+    }
+
+    private void updateBackground(AdapterView<?> parent, int position){
+
     }
 }

@@ -42,6 +42,9 @@ public class Module {
     public String getModuleStatus(){
         return this.status;
     }
+    public ArrayList<String> getPathways() {
+        return pathways;
+    }
 
     public void setModuleStatus(String status){
         this.status = status;
