@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">StudyPlanner</string>
+    <string name="disclaimer">Disclaimer</string>
+    <string name="disclaimer_def"> This mobile app is intended for informational, education and research purpose only.</string>
 </resources>
