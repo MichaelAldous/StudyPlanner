@@ -1,6 +1,9 @@
 package com.example.maldo.studyplanner;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.text.Layout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,11 +27,37 @@ public class PlannerModuleAdapter  extends ArrayAdapter<Module> {
         TextView tvModID = (TextView) convertView.findViewById(R.id.pli_modId);
         TextView tvModName = (TextView) convertView.findViewById(R.id.pli_modName);
         TextView tvCredits = (TextView) convertView.findViewById(R.id.pli_credits);
+        TextView tvPrereq = (TextView) convertView.findViewById(R.id.pli_prereq);
 
         tvModID.setText(module.getModuleId());
         tvModName.setText(module.getModuleName());
         tvCredits.setText(String.valueOf(module.getModuleCredits()));
 
+        ArrayList<String> prereq = module.getModulePrereqs();
+        String prereqString = "";
+        for(String pr: prereq){
+            prereqString = pr + ", ";
+        }
+        if(prereqString != null && prereqString.length() > 0){
+            prereqString = prereqString.substring(0, prereqString.length() -2);
+        } else if (prereqString == ""){
+            prereqString = "None";
+        }
+        tvPrereq.setText(prereqString);
+
+        this.setColour(convertView, module);
         return convertView;
+    }
+
+    private void setColour(View view, Module module){
+        Log.d("PARENT", "setColour: " + module.getModuleStatus());
+        if(module.getModuleStatus().equals("rnm")){
+            view.setBackgroundColor(Color.RED);
+        } else if (module.getModuleStatus().equals("passed")){
+            view.setBackgroundColor(Color.GREEN);
+        } else {
+            view.setBackgroundColor(Color.WHITE);
+        }
+
     }
 }

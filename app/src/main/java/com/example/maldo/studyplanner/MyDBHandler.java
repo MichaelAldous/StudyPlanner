@@ -108,16 +108,31 @@ public class MyDBHandler extends SQLiteOpenHelper {
         //Add student_mod here
         Cursor cursor = db.rawQuery("Select * from " + modulesEntry.TABLE_MODULES, null);
         List<String> fileName = new ArrayList<>();
+        String status;
         if (cursor.moveToFirst()){
+            Cursor cursor2 = db.rawQuery("Select * from " + modPrereqEntry.TABLE_REQUIREMENTS + " where " + modPrereqEntry.COLUMN_REQ_MOD_ID +
+                    " = '" + cursor.getString(cursor.getColumnIndex(modulesEntry.COLUMN_MOD_ID)) + "';", null);
+            if(cursor2.moveToFirst()){
+                status = "rnm";
+            } else {
+                status = "nyp";
+            }
             db.execSQL("INSERT INTO " + studentModuleEntry.TABLE_STUD_MOD +
                     "("+ studentModuleEntry.COLUMN_SM_STUD_ID + "," + studentModuleEntry.COLUMN_SM_MOD_ID + ","+ studentModuleEntry.COLUMN_SM_STATUS +
-                    ") VALUES (" + studID +",'"+cursor.getString(cursor.getColumnIndex(modulesEntry.COLUMN_MOD_ID))+ "','nyp');"
+                    ") VALUES (" + studID +",'"+cursor.getString(cursor.getColumnIndex(modulesEntry.COLUMN_MOD_ID))+ "','"+ status+"');"
             );
             //fileName.add(cursor.getString(cursor.getColumnIndex(modulesEntry.COLUMN_MOD_ID)));
             while (cursor.moveToNext()){
+                cursor2 = db.rawQuery("Select * from " + modPrereqEntry.TABLE_REQUIREMENTS + " where " + modPrereqEntry.COLUMN_REQ_MOD_ID +
+                        " = '" + cursor.getString(cursor.getColumnIndex(modulesEntry.COLUMN_MOD_ID)) + "';", null);
+                if(cursor2.moveToFirst()){
+                    status = "rnm";
+                } else {
+                    status = "nyp";
+                }
                 db.execSQL("INSERT INTO " + studentModuleEntry.TABLE_STUD_MOD +
                         "("+ studentModuleEntry.COLUMN_SM_STUD_ID + "," + studentModuleEntry.COLUMN_SM_MOD_ID + ","+ studentModuleEntry.COLUMN_SM_STATUS +
-                        ") VALUES (" + studID +",'"+cursor.getString(cursor.getColumnIndex(modulesEntry.COLUMN_MOD_ID))+ "','nyp');"
+                        ") VALUES (" + studID +",'"+cursor.getString(cursor.getColumnIndex(modulesEntry.COLUMN_MOD_ID))+ "','"+ status+"');"
                 );
                 //fileName.add(cursor.getString(cursor.getColumnIndex(modulesEntry.COLUMN_MOD_ID)));
             }

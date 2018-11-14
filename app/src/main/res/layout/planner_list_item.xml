@@ -4,11 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:padding="1dp"
+    android:background="#FFFFFF">
 
     <android.support.constraint.ConstraintLayout
+        android:id="@+id/pli_innerLayout"
         android:layout_width="match_parent"
-        android:layout_height="70dp">
+        android:layout_height="66dp">
 
         <TextView
             android:id="@+id/pli_credits"
@@ -27,7 +30,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="6dp"
             android:text="mod name"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textSize="14sp"
@@ -39,7 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:text="mod ID"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textSize="16sp"
@@ -72,7 +75,7 @@
             app:layout_constraintEnd_toStartOf="@+id/pli_credits" />
 
         <TextView
-            android:id="@+id/tvPrereqInput"
+            android:id="@+id/pli_prereq"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"

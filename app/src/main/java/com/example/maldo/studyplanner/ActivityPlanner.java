@@ -6,12 +6,14 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -23,11 +25,13 @@ public class ActivityPlanner extends AppCompatActivity {
 
     MyDBHandler dbHandler = new MyDBHandler(this);
     public static ArrayList<Module> moduleList = new ArrayList<>();
-    public static ArrayList<Module> spinnerList = new ArrayList<>();
+    public static ArrayList<Module> plannerList = new ArrayList<>();
     private ListView moduleListView ;
     private PlannerModuleAdapter plannerModuleAdapter;
     private String pathway;
     private Integer semester;
+    private Boolean firstloadP = true;
+    private Boolean firstloadS = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,14 +61,19 @@ public class ActivityPlanner extends AppCompatActivity {
         moduleList = dbHandler.GetStudentModules(studID);
         pathway = pathwaySpinner.getSelectedItem().toString();
         semester = Integer.parseInt(semesterSpinner.getSelectedItem().toString());
-        refreshModuleList(pathway, semester);
+        Log.d("COLOUR", "ON CREATE: ");
+
 
         // Pathway selector
         pathwaySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 pathway = pathwaySpinner.getSelectedItem().toString();
-                refreshModuleList(pathway, semester);
+                if(!firstloadP){
+                    refreshModuleList(pathway, semester);
+                }else {
+                    firstloadP = false;
+                }
             }
 
             @Override
@@ -78,7 +87,11 @@ public class ActivityPlanner extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 semester = Integer.parseInt(semesterSpinner.getSelectedItem().toString());
-                refreshModuleList(pathway, semester);
+                if(!firstloadS){
+                    refreshModuleList(pathway, semester);
+                } else {
+                    firstloadS = false;
+                }
             }
 
             @Override
@@ -93,44 +106,46 @@ public class ActivityPlanner extends AppCompatActivity {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 Module module = (Module) parent.getAdapter().getItem(position);
-                if(module.getModuleStatus().matches("nyp")&&(requirementsMet(module))){
+                if(!requirementsMet(module)){
+                    module.setModuleStatus("rnm");
+                    Toast.makeText(getApplicationContext(), "Prerequisites not met.",
+                            Toast.LENGTH_SHORT).show();
+                } else if (module.getModuleStatus().matches("nyp")) {
                     module.setModuleStatus("passed");
-                    parent.getChildAt(position).setBackgroundColor(Color.GREEN);
-                    Toast.makeText(getApplicationContext(), "MODULE SET TO PASSED",
-                            Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Module set to passed.",
+                            Toast.LENGTH_SHORT).show();
                 } else {
                     module.setModuleStatus("nyp");
-                    parent.getChildAt(position).setBackgroundColor(Color.WHITE);
-                    Toast.makeText(getApplicationContext(), "MODULE SET TO NYP",
-                            Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Module set to active.",
+                            Toast.LENGTH_SHORT).show();
                 }
+                refreshModuleList(pathway, semester);
                 return false;
             }
         });
 
+        refreshModuleList(pathway, semester);
     }
 
     public void refreshModuleList(String pathway, Integer semester){
-        spinnerList.clear();
+        plannerList.clear();
         for(Module m: moduleList ){
             if(m.getModuleSemester().equals(semester) && (m.getPathways().contains(pathway) || m.getPathways().contains("Core"))){
-                spinnerList.add(m);
+                plannerList.add(m);
             }
         }
-        plannerModuleAdapter = new PlannerModuleAdapter(this, spinnerList);
+        plannerModuleAdapter = new PlannerModuleAdapter(this, plannerList);
         moduleListView.setAdapter(plannerModuleAdapter);
-        Log.d("REFRESH", "refreshStudentList: " + spinnerList);
-
+        Log.d("PARENT", "refreshStudentList: " + plannerList);
         plannerModuleAdapter.notifyDataSetChanged();
 
         if(moduleListView.getAdapter().getCount() == 0){
             Toast.makeText(getApplicationContext(), "Error, no modules found. Please recreate student.",
                     Toast.LENGTH_LONG).show();
         }
-        Log.d("REFRESH", "refreshStudentList: " + spinnerList);
     }
 
-    // Used for onItemLongClick, to check if requirements met, before changing Module to passed
+     // Used for onItemLongClick, to check if requirements met, before changing Module to passed
     public boolean requirementsMet(Module module){
         boolean isMet = false;
         ArrayList<String> prereqs = module.getModulePrereqs();
@@ -165,7 +180,4 @@ public class ActivityPlanner extends AppCompatActivity {
         return null;
     }
 
-    private void updateBackground(AdapterView<?> parent, int position){
-
-    }
 }
