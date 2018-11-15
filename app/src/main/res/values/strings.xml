@@ -12,4 +12,8 @@
     <string name="specification">Specification: </string>
     <string name="specification_1">Platform: Android API version: 28</string>
     <string name="app_version">App Version: Meow.5</string>
+    <string name="planner_instructions">Press down on a module for a couple seconds to alternate between "passed" and "active". \n
+        White indicates active. \n
+        Green indicates passed. \n
+        Red indicates prerequisites not met.</string>
 </resources>

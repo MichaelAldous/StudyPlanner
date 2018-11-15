@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d("checkDB", "onCreate: DB DOES NOT EXIST");
             dbHandler.getWritableDatabase();
             dbHandler.PopulateDB();
+            dbHandler.createEditorDB();
             //Create database
             //dbHandler = new MyDBHandler(this);
 

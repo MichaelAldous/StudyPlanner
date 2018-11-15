@@ -60,6 +60,46 @@ public class Data {
         public static final String COLUMN_SM_STATUS = "_sm_status"; //"active", "inactive", "passed"
     }
 
+
+
+
+
+    // EDITOR PATHWAYS
+    public static final class editorPathwaysEntry implements BaseColumns
+    {
+        public static final String TABLE_PATHWAYS = "editor_pathways";
+        public static final String COLUMN_PATH_ID = "_path_id"; // auto increment number?
+        public static final String COLUMN_PATH_NAME = "_path_name"; // "Core", "Software Engineering", "Database Architecture", "Networking", "Multi Media Web Development"
+    }
+
+    // EDITOR MODULE
+    public static final class editorModulesEntry implements BaseColumns
+    {
+        public static final String TABLE_MODULES = "editor_modules";
+        public static final String COLUMN_MOD_ID = "_mod_id"; //"INFO703" etc.
+        public static final String COLUMN_MOD_NAME = "_mod_name"; //Mobile App Dev
+        public static final String COLUMN_MOD_PREREQ = "_mod_prereq"; // "MAT501", can be null etc.
+        public static final String COLUMN_MP_SEMESTER = "_mp_semester"; // FK
+        public static final String COLUMN_MOD_DESC = "_mod_desc"; // "For mobile app we make apps blah blah blah"
+        public static final String COLUMN_MOD_CRED = "_mod_cred"; // "For mobile app we make apps blah blah blah"
+    }
+
+    // EDITOR MOD PATHS
+    public static final class editorModPathsEntry implements BaseColumns
+    {
+        public static final String TABLE_MOD_PATH = "editor_mod_path";
+        public static final String COLUMN_MP_MOD_ID = "_mp_mod_id"; // PK FK
+        public static final String COLUMN_MP_PATH_ID = "_mp_path_id"; // PK FK
+    }
+    // EDITOR MOD PREREQ
+    public static final class editorModPrereqEntry implements BaseColumns
+    {
+        public static final String TABLE_REQUIREMENTS = "editor_mod_prereq";
+        public static final String COLUMN_MP_ID = "_mp_id";
+        public static final String COLUMN_REQ_MOD_ID = "_mp_mod_id"; // PK FK
+        public static final String COLUMN_REQ_REQMOD_ID = "_mp_prereq_id"; // PK FK
+    }
+
     //    // PATHWAYS TABLE
 //    public static final String TABLE_PATHWAYS = "pathways";
 //    public static final String COLUMN_PATH_ID = "_path_id"; // auto increment number?

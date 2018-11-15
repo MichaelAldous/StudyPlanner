@@ -23,7 +23,6 @@ public class MyDBHandler extends SQLiteOpenHelper {
     }
 
     public void onCreate(SQLiteDatabase db){
-        Log.d("MyDBHandler", "onCreate: Database ");
         // create PATHWAYS
         final String SQL_CREATE_PATHWAYS_TABLE = "CREATE TABLE " +
                 pathwaysEntry.TABLE_PATHWAYS + "( " +
@@ -97,8 +96,101 @@ public class MyDBHandler extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    // --------------------------------- EDITOR STUFF --------------------------------- //
+
+    // Copies tables: Module, Pathway, and mod_path for the Editor to use.
+    public void createEditorDB(){
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL("DROP TABLE IF EXISTS " + editorModPrereqEntry.TABLE_REQUIREMENTS);
+        db.execSQL("DROP TABLE IF EXISTS " + editorModPathsEntry.TABLE_MOD_PATH);
+        db.execSQL("DROP TABLE IF EXISTS " + editorPathwaysEntry.TABLE_PATHWAYS);
+        db.execSQL("DROP TABLE IF EXISTS " + editorModulesEntry.TABLE_MODULES);
+        db.execSQL("CREATE TABLE " + editorModulesEntry.TABLE_MODULES + " AS SELECT * FROM " + modulesEntry.TABLE_MODULES + ";");
+        db.execSQL("CREATE TABLE " + editorPathwaysEntry.TABLE_PATHWAYS + " AS SELECT * FROM " + pathwaysEntry.TABLE_PATHWAYS + ";");
+        db.execSQL("CREATE TABLE " + editorModPathsEntry.TABLE_MOD_PATH + " AS SELECT * FROM " + modPathsEntry.TABLE_MOD_PATH + ";");
+        db.execSQL("CREATE TABLE " + editorModPrereqEntry.TABLE_REQUIREMENTS + " AS SELECT * FROM " + modPrereqEntry.TABLE_REQUIREMENTS + ";");
+        db.close();
+    }
+
+    //Get modules for editor
+    public ArrayList<Module> GetEditorModules(){
+        ArrayList<Module> moduleList = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+
+        String query = "Select * FROM " +
+                editorModulesEntry.TABLE_MODULES + ";";
+
+        Cursor cursor = db.rawQuery(query, null);
+        if(cursor != null){
+            if (cursor.moveToFirst()){
+                do {
+                    String modId = cursor.getString(cursor.getColumnIndex(editorModulesEntry.COLUMN_MOD_ID));
+                    String modName  = cursor.getString(cursor.getColumnIndex(editorModulesEntry.COLUMN_MOD_NAME));
+                    String modDesc = cursor.getString(cursor.getColumnIndex(editorModulesEntry.COLUMN_MOD_DESC));
+                    Integer modCredits = cursor.getInt(cursor.getColumnIndex(editorModulesEntry.COLUMN_MOD_CRED));
+                    String modStatus = "active";
+                    Integer modSemester = cursor.getInt(cursor.getColumnIndex(editorModulesEntry.COLUMN_MP_SEMESTER));
+                    ArrayList<String> modPrereq = EditorGetModPrereq(modId);
+                    ArrayList<String> modPath = EditorGetModPaths(modId);
+
+                    moduleList.add(new Module(modId, modName, modDesc, modPrereq, modPath, modSemester, modCredits, modStatus));
+                } while(cursor.moveToNext());
+            }
+            cursor.close();
+        }
+        db.close();
+        return moduleList;
+    }
+    public ArrayList<String> EditorGetModPaths(String modID){
+        ArrayList<String> modPaths = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+
+        String query = " SELECT * FROM "
+                + editorPathwaysEntry.TABLE_PATHWAYS + " JOIN " + editorModPathsEntry.TABLE_MOD_PATH + " ON " +
+                editorPathwaysEntry.COLUMN_PATH_ID + " = " + editorModPathsEntry.COLUMN_MP_PATH_ID +
+                " WHERE " + editorModPathsEntry.COLUMN_MP_MOD_ID + " = '" + modID + "';";
+
+        Cursor cursor = db.rawQuery(query, null);
+        if(cursor != null){
+            if (cursor.moveToFirst()){
+                do {
+                    String paths = cursor.getString(cursor.getColumnIndex(editorPathwaysEntry.COLUMN_PATH_NAME));
+                    modPaths.add(paths);
+                } while(cursor.moveToNext());
+            }
+            cursor.close();
+        }
+        db.close();
+        return modPaths;
+    }
+
+    public ArrayList<String> EditorGetModPrereq(String modID){
+        ArrayList<String> modPrereq = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+
+        String query = " SELECT "+ editorModPrereqEntry.COLUMN_REQ_REQMOD_ID +" FROM " + editorModPrereqEntry.TABLE_REQUIREMENTS +
+                " WHERE " + editorModPrereqEntry.COLUMN_REQ_MOD_ID + " = '"  + modID + "';";
+
+        Cursor cursor = db.rawQuery(query, null);
+        if(cursor != null){
+            if (cursor.moveToFirst()){
+                do {
+                    String requiredMod = cursor.getString(cursor.getColumnIndex(editorModPrereqEntry.COLUMN_REQ_REQMOD_ID));
+                    modPrereq.add(requiredMod);
+                } while(cursor.moveToNext());
+            }
+            cursor.close();
+        }
+        db.close();
+        return modPrereq;
+    }
+
+    // --------------------------------- END OF EDITOR STUFF --------------------------------- //
+
+    // --------------------------------- PLANNER STUFF --------------------------------- //
+
+    // Updated students module status when status is changed
     public void updateModuleStatus(Integer studId,String modID, String status){
-        Log.d("QUERY", "updateModuleStatus: ");
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(studentModuleEntry.COLUMN_SM_STATUS,status);
@@ -107,6 +199,7 @@ public class MyDBHandler extends SQLiteOpenHelper {
         db.close();
     }
 
+    // Add student to database
     public void AddStudent(int studID, String fName, String lName, String email){
         ContentValues values = new ContentValues();
         values.put(studentEntry.COLUMN_STUD_ID, studID);
@@ -178,6 +271,7 @@ public class MyDBHandler extends SQLiteOpenHelper {
         return true;
     }
 
+    // Gets list of students for listview
     public ArrayList<Student> getListOfStudents(Integer studID){
         ArrayList<Student> studentList = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
@@ -207,22 +301,14 @@ public class MyDBHandler extends SQLiteOpenHelper {
 
     //Get students modules pathways
     //insert into pathways arraylist
-
-
     public ArrayList<Module> GetStudentModules(Integer studID){
         ArrayList<Module> moduleList = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
-        //String query = "SELECT * FROM " +
-        //              studentModuleEntry.TABLE_STUD_MOD + "," +
-        //              modulesEntry.TABLE_MODULES +
-        //              " WHERE " +
-        //              studentModuleEntry.COLUMN_SM_STUD_ID + "=" + studID +";";
 
         String query = "Select * FROM " +
                 studentModuleEntry.TABLE_STUD_MOD + " JOIN " + modulesEntry.TABLE_MODULES + " ON " +
                         studentModuleEntry.COLUMN_SM_MOD_ID + " = " + modulesEntry.COLUMN_MOD_ID +
                 " WHERE " + studentModuleEntry.COLUMN_SM_STUD_ID + " = '" + studID + "';";
-
 
         Cursor cursor = db.rawQuery(query, null);
         if(cursor != null){
@@ -237,24 +323,18 @@ public class MyDBHandler extends SQLiteOpenHelper {
                     ArrayList<String> modPrereq = GetModPrereq(modId);
                     ArrayList<String> modPath = GetModPaths(modId);
 
-                    Log.d("REFRESH", "GetStudentModules: " + modId + ", " +modStatus + ", " + modName  + ", " + modDesc  + ", " + modCredits  + ", " + modSemester + ", " + modPrereq + ", " + modPath);
                     moduleList.add(new Module(modId, modName, modDesc, modPrereq, modPath, modSemester, modCredits, modStatus));
                 } while(cursor.moveToNext());
             }
             cursor.close();
         }
         db.close();
-        Log.d("REFRESH", "GetStudentModules: " + moduleList);
         return moduleList;
     }
 
     public ArrayList<String> GetModPaths(String modID){
         ArrayList<String> modPaths = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
-
-        //String query = " SELECT "+ pathwaysEntry.COLUMN_PATH_NAME +
-        //        " FROM " + pathwaysEntry.TABLE_PATHWAYS +
-        //        " WHERE " + pathwaysEntry.COLUMN_PATH_ID + " = '" + modID + "';";
 
         String query = " SELECT * FROM "
                 + pathwaysEntry.TABLE_PATHWAYS + " JOIN " + modPathsEntry.TABLE_MOD_PATH + " ON " +
@@ -278,10 +358,6 @@ public class MyDBHandler extends SQLiteOpenHelper {
     public ArrayList<String> GetModPrereq(String modID){
         ArrayList<String> modPrereq = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
-
-        //String query = " SELECT "+ modPathsEntry.COLUMN_MP_PATH_ID +
-        //       " FROM " + modPathsEntry.TABLE_MOD_PATH +
-        //       " WHERE " + modPathsEntry.COLUMN_MP_MOD_ID + " = (" + modID + ";";
 
         String query = " SELECT "+ modPrereqEntry.COLUMN_REQ_REQMOD_ID +" FROM " + modPrereqEntry.TABLE_REQUIREMENTS +
                 " WHERE " + modPrereqEntry.COLUMN_REQ_MOD_ID + " = '"  + modID + "';";
@@ -337,10 +413,6 @@ public class MyDBHandler extends SQLiteOpenHelper {
         return semesterList;
     }
 
-    public void StudentModUpdate(){
-        //Update stud_mod table if student passes module, or new one meets prerequisites
-    }
-
     public void AddModule(SQLiteDatabase db, String modID, String modName,  int cred, int semester, String description, ArrayList<String> prereq, ArrayList<Integer> pathways){
         //Add module to module table
         ContentValues values = new ContentValues();
@@ -362,10 +434,8 @@ public class MyDBHandler extends SQLiteOpenHelper {
             }
         }
 
-        Log.d("Pathways", "AddModule: PATHWAYS PRE IF:"+pathways);
         if(pathways.size()>0){
             for(Integer pathID : pathways){
-                Log.d("Pathways", "AddModule: PATHWAYS IS NOT NULL:"+pathways);
                 db.execSQL(
                         "INSERT INTO "+modPathsEntry.TABLE_MOD_PATH+
                                 "("+modPathsEntry.COLUMN_MP_MOD_ID+","+modPathsEntry.COLUMN_MP_PATH_ID+")" +
@@ -373,7 +443,6 @@ public class MyDBHandler extends SQLiteOpenHelper {
                 );
             }
         } else {
-            Log.d("Pathways", "AddModule: PATHWAYS IS NULL");
             db.execSQL(
                     "INSERT INTO "+modPathsEntry.TABLE_MOD_PATH+
                             "("+modPathsEntry.COLUMN_MP_MOD_ID+","+modPathsEntry.COLUMN_MP_PATH_ID+")" +
@@ -389,6 +458,7 @@ public class MyDBHandler extends SQLiteOpenHelper {
         db.insert(pathwaysEntry.TABLE_PATHWAYS, null, values);
     }
 
+    // --------------------------------- INSERT STATEMENTS --------------------------------- //
 
     //populate
     public void PopulateDB(){
@@ -407,20 +477,15 @@ public class MyDBHandler extends SQLiteOpenHelper {
 
 
         //Modules()
-        //Database, ID, Name, ArrayList<String> Pre-reqs, credits, semester, description, ArrayList<Integer> pathways
+        //Database, ID, Name, credits, semester, description, ArrayList<String> Pre-reqs, ArrayList<Integer> pathways
         //this.AddModule(db, "", "",null,15, 2,"Info501 desc", null);
 
         // Leaving prequeList empty(null), results in no requirements for the paper
         // Leaving pathwayList empty(null), results in the module being defined as Core pathway.
         ArrayList<String> prequeList = new ArrayList<>();
         ArrayList<Integer> pathwayList = new ArrayList<>();
-
-        /*
-
-         prequeList.add("");
-         pathwayList.add("");
-
-        */
+        //prequeList.add("");
+        //pathwayList.add("");
 
         // ------------------------------------------- Semester 1 ------------------------------------------- //
         // ----- MODULE 1 ----- //
