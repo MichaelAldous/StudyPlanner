@@ -1,5 +1,15 @@
 <resources>
     <string name="app_name">StudyPlanner</string>
     <string name="disclaimer">Disclaimer</string>
-    <string name="disclaimer_def">The DPM App is a Prototype version of a degree planner only and NOT an official study plan. It is intended that students shall use this to get an understanding of the pathways offered and then discuss study plans with a Wintec representative. Pathways may change accordingly making older versions redundant – Wintec takes no responsibility of outdated pathways or information displayed on the app.</string>
+    <string name="disclaimer_def">The DPM App is a Prototype version of a degree planner only and
+        NOT an official study plan. It is intended that students shall use this to get an
+        understanding of the pathways offered and then discuss study plans with a Wintec
+        representative. Pathways may change accordingly making older versions redundant – Wintec
+        takes no responsibility of outdated pathways or information displayed on the app.</string>
+    <string name="about_us">Degree Programe Mapper was developed for Wintec, by Catdog54.</string>
+    <string name="member">Catdog54 Members:</string>
+    <string name="members">Michael Aldous, Hayden Ferries, Corban Whiteman, David Taylor, Showan Simkhada.</string>
+    <string name="specification">Specification: </string>
+    <string name="specification_1">Platform: Android API version: 28</string>
+    <string name="app_version">App Version: Meow.5</string>
 </resources>
