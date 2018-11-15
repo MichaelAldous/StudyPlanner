@@ -28,6 +28,7 @@ public class ActivityPlanner extends AppCompatActivity {
     public static ArrayList<Module> plannerList = new ArrayList<>();
     private ListView moduleListView ;
     private PlannerModuleAdapter plannerModuleAdapter;
+    private Integer studID;
     private String pathway;
     private Integer semester;
     private Boolean firstloadP = true;
@@ -40,10 +41,10 @@ public class ActivityPlanner extends AppCompatActivity {
 
         moduleListView = findViewById(R.id.moduleListView);
         Intent intent = getIntent();
-        Integer studID = Integer.parseInt(intent.getExtras().getString("extrasID"));
-        String studFname = intent.getExtras().getString("extrasFname");
-        String studLname = intent.getExtras().getString("extrasLname");
-        String studEmail = intent.getExtras().getString("extrasEmail");
+        studID = Integer.parseInt(intent.getExtras().getString("extrasID"));
+        final String studFname = intent.getExtras().getString("extrasFname");
+        final String studLname = intent.getExtras().getString("extrasLname");
+        final String studEmail = intent.getExtras().getString("extrasEmail");
 
         final Spinner pathwaySpinner = findViewById(R.id.spinner_pathways);
         ArrayList<String> pathwayList = dbHandler.GetPathways();
@@ -110,21 +111,73 @@ public class ActivityPlanner extends AppCompatActivity {
                     module.setModuleStatus("rnm");
                     Toast.makeText(getApplicationContext(), "Prerequisites not met.",
                             Toast.LENGTH_SHORT).show();
-                } else if (module.getModuleStatus().matches("nyp")) {
+                } else if (module.getModuleStatus().matches("active")) {
                     module.setModuleStatus("passed");
                     Toast.makeText(getApplicationContext(), "Module set to passed.",
                             Toast.LENGTH_SHORT).show();
                 } else {
-                    module.setModuleStatus("nyp");
+                    module.setModuleStatus("active");
                     Toast.makeText(getApplicationContext(), "Module set to active.",
                             Toast.LENGTH_SHORT).show();
                 }
+                updateModulePrereqStatus(module.getModuleId());
+                dbHandler.updateModuleStatus(studID, module.getModuleId(), module.getModuleStatus());
                 refreshModuleList(pathway, semester);
                 return false;
             }
         });
 
         refreshModuleList(pathway, semester);
+
+        Button sendEmailButton = (Button) findViewById(R.id.buttonEmail);
+        sendEmailButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            String emailSender = "degreeprogrammemapper@gmail.com";
+                            String emailPW = "OursIsTheFury";
+                            String studName = studFname + " " + studLname;
+                            String message = compileMessage(pathway, studName);
+
+                            GMailSender sender = new GMailSender(
+                                    emailSender,
+                                    emailPW);
+                            //sender.addAttachment();
+                            sender.sendMail("Test mail", message,
+                                    emailSender,
+                                    studEmail);
+                        } catch (Exception e) {
+                            Toast.makeText(getApplicationContext(),"Error",Toast.LENGTH_LONG).show();                        }
+                    }
+                }).start();
+            }
+        });
+    }
+
+    private String compileMessage(String pathway, String studName){
+        String message =  "Degree Mapper for " + studName + " \n" +
+                            "Pathway: " + pathway + " \n";
+        for(int i = 1; i < 7; i++){
+            message = message + "------------------------ \n" +
+                                "Semester: " + i + " \n"
+                                + "------------------------ \n";
+            for(Module mod: moduleList){
+                if((mod.getPathways().contains(pathway) || mod.getPathways().contains("Core")) && mod.getModuleSemester().equals(i)){
+                    if(mod.getModuleStatus().equals("rnm")){
+                        message = message + mod.getModuleId() + ", Requirements Not Met \n";
+                    } else if (mod.getModuleStatus().equals("active")){
+                        message = message + mod.getModuleId() + ", Active \n";
+                    } else {
+                        message = message + mod.getModuleId() + ", Passed \n";
+                    }
+                }
+            }
+        }
+
+        return message;
     }
 
     public void refreshModuleList(String pathway, Integer semester){
@@ -178,6 +231,30 @@ public class ActivityPlanner extends AppCompatActivity {
             }
         }
         return null;
+    }
+
+    public void updateModulePrereqStatus(String upDatedMod){
+        for(Module mod: moduleList){
+            if(mod.getModulePrereqs().contains(upDatedMod)){
+                Boolean allPrereqPassed = true;
+                for(String prereqMod: mod.getModulePrereqs()){
+                    if(findMod(prereqMod).getModuleStatus().equals("active") ||findMod(prereqMod).getModuleStatus().equals("rnm")){
+                        allPrereqPassed = false;
+                        break;
+                    }
+                }
+                Log.d("UPDATEMOD", "updateModulePrereqStatus MODULE: " + mod.getModuleId());
+                if(allPrereqPassed){
+                    mod.setModuleStatus("active");
+                    dbHandler.updateModuleStatus(studID, mod.getModuleId(), mod.getModuleStatus());
+                    Log.d("UPDATEMOD", "updateModulePrereqStatus ACTIVE: " + mod.getModuleStatus());
+                } else {
+                    mod.setModuleStatus("rnm");
+                    dbHandler.updateModuleStatus(studID, mod.getModuleId(), mod.getModuleStatus());
+                    Log.d("UPDATEMOD", "updateModulePrereqStatus RNM: " + mod.getModuleStatus());
+                }
+            }
+        }
     }
 
 }

@@ -97,6 +97,16 @@ public class MyDBHandler extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    public void updateModuleStatus(Integer studId,String modID, String status){
+        Log.d("QUERY", "updateModuleStatus: ");
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(studentModuleEntry.COLUMN_SM_STATUS,status);
+        db.update(studentModuleEntry.TABLE_STUD_MOD, values, studentModuleEntry.COLUMN_SM_STUD_ID + "= '" +studId.toString() +
+                "' and " +studentModuleEntry.COLUMN_SM_MOD_ID +" = '"+ modID +"'", null);
+        db.close();
+    }
+
     public void AddStudent(int studID, String fName, String lName, String email){
         ContentValues values = new ContentValues();
         values.put(studentEntry.COLUMN_STUD_ID, studID);
@@ -115,7 +125,7 @@ public class MyDBHandler extends SQLiteOpenHelper {
             if(cursor2.moveToFirst()){
                 status = "rnm";
             } else {
-                status = "nyp";
+                status = "active";
             }
             db.execSQL("INSERT INTO " + studentModuleEntry.TABLE_STUD_MOD +
                     "("+ studentModuleEntry.COLUMN_SM_STUD_ID + "," + studentModuleEntry.COLUMN_SM_MOD_ID + ","+ studentModuleEntry.COLUMN_SM_STATUS +
@@ -128,7 +138,7 @@ public class MyDBHandler extends SQLiteOpenHelper {
                 if(cursor2.moveToFirst()){
                     status = "rnm";
                 } else {
-                    status = "nyp";
+                    status = "active";
                 }
                 db.execSQL("INSERT INTO " + studentModuleEntry.TABLE_STUD_MOD +
                         "("+ studentModuleEntry.COLUMN_SM_STUD_ID + "," + studentModuleEntry.COLUMN_SM_MOD_ID + ","+ studentModuleEntry.COLUMN_SM_STATUS +

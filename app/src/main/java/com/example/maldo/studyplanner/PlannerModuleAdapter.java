@@ -36,10 +36,10 @@ public class PlannerModuleAdapter  extends ArrayAdapter<Module> {
         ArrayList<String> prereq = module.getModulePrereqs();
         String prereqString = "";
         for(String pr: prereq){
-            prereqString = pr + ", ";
+            prereqString = prereqString + ", " + pr;
         }
         if(prereqString != null && prereqString.length() > 0){
-            prereqString = prereqString.substring(0, prereqString.length() -2);
+            prereqString = prereqString.substring(2, prereqString.length());
         } else if (prereqString == ""){
             prereqString = "None";
         }
