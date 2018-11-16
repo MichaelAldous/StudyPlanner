@@ -11,7 +11,20 @@
     <android.support.constraint.ConstraintLayout
         android:id="@+id/pli_innerLayout"
         android:layout_width="match_parent"
-        android:layout_height="66dp">
+        android:layout_height="150dp">
+
+        <EditText
+            android:id="@+id/eli_semester"
+            android:layout_width="30dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:ems="10"
+            android:inputType="number"
+            android:text="1"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toTopOf="@+id/eli_credits"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <TextView
             android:id="@+id/tvRequired"
@@ -19,11 +32,13 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
             android:text="Prerequisites:"
             android:textColor="#000000"
             android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/eli_mod_id" />
 
         <TextView
             android:id="@+id/tvCredits"
@@ -81,13 +96,47 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
             android:ems="10"
             android:inputType="textPersonName"
-            android:text="Name"
+            android:text="Prereq"
             android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/textView18"
+            app:layout_constraintStart_toEndOf="@+id/tvRequired"
+            app:layout_constraintTop_toBottomOf="@+id/eli_mod_id" />
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="Pathway:"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvRequired" />
+
+        <TextView
+            android:id="@+id/textView18"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:layout_marginEnd="8dp"
+            android:text="Semester:"
+            android:textColor="#000000"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toTopOf="@+id/tvCredits"
+            app:layout_constraintEnd_toStartOf="@+id/eli_semester" />
+
+        <Spinner
+            android:id="@+id/spinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
             app:layout_constraintEnd_toStartOf="@+id/tvCredits"
-            app:layout_constraintStart_toEndOf="@+id/tvRequired" />
+            app:layout_constraintStart_toEndOf="@+id/textView4"
+            tools:layout_editor_absoluteY="110dp" />
     </android.support.constraint.ConstraintLayout>
 
 </LinearLayout>

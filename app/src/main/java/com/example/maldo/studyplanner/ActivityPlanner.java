@@ -102,7 +102,6 @@ public class ActivityPlanner extends AppCompatActivity {
         });
 
         // Hold down to set module to passed or nyp
-        //TODO: update database, set background colours, passed = green, active = white
         moduleListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {

@@ -8,91 +8,40 @@
     tools:layout_editor_absoluteY="81dp">
 
     <Spinner
-        android:id="@+id/editor_spinner_semester"
-        android:layout_width="0dp"
-        android:layout_height="35dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="8dp"
-        android:background="#FFFFFF"
-        android:spinnerMode="dialog"
-        app:layout_constraintEnd_toStartOf="@+id/editor_buttonEmail"
-        app:layout_constraintStart_toEndOf="@+id/editor_textView2"
-        app:layout_constraintTop_toBottomOf="@+id/editor_spinner_pathways" />
-
-    <Spinner
-        android:id="@+id/editor_spinner_pathways"
+        android:id="@+id/editor_spinner_modules"
         android:layout_width="0dp"
         android:layout_height="35dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="8dp"
         android:background="#FFFFFF"
         android:spinnerMode="dialog"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@+id/editor_textView1"
-        app:layout_constraintTop_toBottomOf="@+id/editor_textView5" />
-
-    <ListView
-        android:id="@+id/editor_moduleListView"
-        android:layout_width="365dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:divider="#FBED21"
-        android:dividerHeight="10dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editor_spinner_semester" />
+        app:layout_constraintTop_toBottomOf="@+id/editor_buttonSave" />
 
     <TextView
         android:id="@+id/editor_textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="12dp"
-        android:text="Select Pathway:"
+        android:layout_marginTop="8dp"
+        android:text="Module:"
         android:textColor="#000000"
-        android:textSize="18sp"
+        android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editor_textView5" />
-
-    <TextView
-        android:id="@+id/editor_textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:text="Select Semester:"
-        android:textColor="#000000"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editor_textView1" />
+        app:layout_constraintTop_toBottomOf="@+id/editor_reset_button" />
 
     <Button
         android:id="@+id/editor_buttonEmail"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginTop="6dp"
         android:text="Email"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editor_spinner_pathways" />
-
-    <TextView
-        android:id="@+id/editor_textView4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/planner_instructions"
-        android:textColor="#000000"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editor_textView3" />
+        app:layout_constraintTop_toBottomOf="@+id/editor_textView5" />
 
     <TextView
         android:id="@+id/editor_textView5"
@@ -111,26 +60,163 @@
 
     <Button
         android:id="@+id/editor_reset_button"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="40dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="8dp"
         android:text="Reset"
-        app:layout_constraintBottom_toTopOf="@+id/editor_spinner_pathways"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editor_textView5" />
+
+    <Button
+        android:id="@+id/editor_buttonSave"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:text="Save"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toStartOf="@+id/editor_buttonEmail"
+        app:layout_constraintStart_toEndOf="@+id/editor_reset_button"
+        app:layout_constraintTop_toBottomOf="@+id/editor_textView5" />
 
     <TextView
-        android:id="@+id/editor_textView3"
+        android:id="@+id/textView19"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Module Id:"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/textView24"
+        app:layout_constraintTop_toTopOf="@+id/et_modId" />
+
+    <TextView
+        android:id="@+id/textView20"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text=" Name:"
+        android:textAlignment="textStart"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/textView24"
+        app:layout_constraintTop_toTopOf="@+id/et_modName" />
+
+    <TextView
+        android:id="@+id/textView21"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Semester:"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/textView24"
+        app:layout_constraintTop_toTopOf="@+id/spinner_semester" />
+
+    <TextView
+        android:id="@+id/textView22"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pathways:"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/textView24"
+        app:layout_constraintTop_toTopOf="@+id/spinner_pathways" />
+
+    <TextView
+        android:id="@+id/textView23"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Credits:"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/textView24"
+        app:layout_constraintTop_toTopOf="@+id/et_credits" />
+
+    <TextView
+        android:id="@+id/textView24"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="Instructions:"
+        android:text="Prerequisites:"
         android:textColor="#000000"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editor_moduleListView" />
+        app:layout_constraintTop_toTopOf="@+id/spinner_prereq" />
+
+    <EditText
+        android:id="@+id/et_modId"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Module Id"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textView24"
+        app:layout_constraintTop_toBottomOf="@+id/editor_spinner_modules" />
+
+    <EditText
+        android:id="@+id/et_modName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Module Name"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textView24"
+        app:layout_constraintTop_toBottomOf="@+id/et_modId" />
+
+    <Spinner
+        android:id="@+id/spinner_semester"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textView24"
+        app:layout_constraintTop_toBottomOf="@+id/et_credits" />
+
+    <Spinner
+        android:id="@+id/spinner_pathways"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textView24"
+        app:layout_constraintTop_toBottomOf="@+id/spinner_semester" />
+
+    <EditText
+        android:id="@+id/et_credits"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:inputType="number"
+        android:text="15"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textView24"
+        app:layout_constraintTop_toBottomOf="@+id/et_modName" />
+
+    <Spinner
+        android:id="@+id/spinner_prereq"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textView24"
+        app:layout_constraintTop_toBottomOf="@+id/spinner_pathways" />
 
 </android.support.constraint.ConstraintLayout>

@@ -1,6 +1,5 @@
 package com.example.maldo.studyplanner;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -15,11 +14,12 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 public class ActivityEditor extends AppCompatActivity {
-        MyDBHandler dbHandler = new MyDBHandler(this);
+    MyDBHandler dbHandler = new MyDBHandler(this);
     public static ArrayList<Module> moduleList = new ArrayList<>();
-    public static ArrayList<Module> plannerList = new ArrayList<>();
+    public static ArrayList<Module> editorList = new ArrayList<>();
     private ListView moduleListView ;
     private EditorModuleAdapter editorModuleAdapter;
+    private String moduleID;
     private String pathway;
     private Integer semester;
     private Boolean firstloadP = true;
@@ -31,50 +31,26 @@ public class ActivityEditor extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
 
-        moduleListView = findViewById(R.id.editor_moduleListView);
-
-        final Spinner pathwaySpinner = findViewById(R.id.editor_spinner_pathways);
-        ArrayList<String> pathwayList = dbHandler.GetPathways();
-        ArrayAdapter<String> pathwayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, pathwayList);
-        pathwaySpinner.setAdapter(pathwayAdapter);
-
-        final Spinner semesterSpinner = findViewById(R.id.editor_spinner_semester);
-        ArrayList<Integer> semesterList = dbHandler.GetSemesters();
-        ArrayAdapter<Integer> semesterAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, semesterList);
-        semesterSpinner.setAdapter(semesterAdapter);
-
+        final Spinner modulesSpinner = findViewById(R.id.editor_spinner_modules);
         moduleList = dbHandler.GetEditorModules();
-        pathway = pathwaySpinner.getSelectedItem().toString();
-        semester = Integer.parseInt(semesterSpinner.getSelectedItem().toString());
+        ArrayList<String> modIdList = new ArrayList<>();
+        for(Module mod: moduleList){
+            modIdList.add(mod.getModuleId());
+        }
+        ArrayAdapter<String> moduleAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, modIdList);
+        modulesSpinner.setAdapter(moduleAdapter);
 
+        moduleID = modulesSpinner.getSelectedItem().toString();
 
         // Pathway selector
-        pathwaySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        modulesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                pathway = pathwaySpinner.getSelectedItem().toString();
+                moduleID = modulesSpinner.getSelectedItem().toString();
                 if(!firstloadP){
-                    refreshModuleList(pathway, semester);
+                    //refreshModuleList(pathway, semester);
                 }else {
                     firstloadP = false;
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
-        // Semester selector
-        semesterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                semester = Integer.parseInt(semesterSpinner.getSelectedItem().toString());
-                if(!firstloadS){
-                    refreshModuleList(pathway, semester);
-                } else {
-                    firstloadS = false;
                 }
             }
 
@@ -90,7 +66,7 @@ public class ActivityEditor extends AppCompatActivity {
             public void onClick(View view) {
                 if(!firstloadRB) {
                     dbHandler.createEditorDB();
-                    refreshModuleList(pathway, semester);
+                    //refreshModuleList(pathway, semester);
                 } else {
                     firstloadRB = false;
                 }
@@ -124,7 +100,25 @@ public class ActivityEditor extends AppCompatActivity {
             }
         });
 
-        refreshModuleList(pathway, semester);
+        Button saveButton = (Button) findViewById(R.id.editor_buttonSave);
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+        //refreshModuleList(pathway, semester);
+    }
+
+    // Used by requirementsMet to get Module object
+    public static Module findMod(String modID){
+        for(Module mod: moduleList){
+            if(mod.getModuleId().equals(modID)){
+                return mod;
+            }
+        }
+        return null;
     }
 
     private String compileMessage(String pathway){
@@ -151,15 +145,15 @@ public class ActivityEditor extends AppCompatActivity {
     }
 
     public void refreshModuleList(String pathway, Integer semester){
-        plannerList.clear();
+        editorList.clear();
         for(Module m: moduleList ){
+            editorList.add(m);
             if(m.getModuleSemester().equals(semester) && (m.getPathways().contains(pathway) || m.getPathways().contains("Core"))){
-                plannerList.add(m);
             }
         }
-        editorModuleAdapter = new EditorModuleAdapter(this, plannerList);
+        editorModuleAdapter = new EditorModuleAdapter(this, editorList);
         moduleListView.setAdapter(editorModuleAdapter);
-        Log.d("PARENT", "refreshStudentList: " + plannerList);
+        Log.d("PARENT", "refreshStudentList: " + editorList);
         Log.d("PARENT", "refreshStudentList: " + moduleList);
         editorModuleAdapter.notifyDataSetChanged();
 
