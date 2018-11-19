@@ -148,10 +148,12 @@ public class ActivityPlanner extends AppCompatActivity {
                             sender.sendMail("Test mail", message,
                                     emailSender,
                                     studEmail);
+
                         } catch (Exception e) {
                             Toast.makeText(getApplicationContext(),"Error",Toast.LENGTH_LONG).show();                        }
                     }
                 }).start();
+                Toast.makeText(getApplicationContext(), "Email Sent to " + studEmail, Toast.LENGTH_LONG).show();
             }
         });
     }
