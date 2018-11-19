@@ -8,80 +8,21 @@
     tools:layout_editor_absoluteY="81dp">
 
     <TextView
-        android:id="@+id/textView_about"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-        android:layout_marginEnd="30dp"
-        android:layout_marginBottom="8dp"
-        android:text="@string/about_us"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@+id/textView17"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
+        android:maxLines="30"
         android:id="@+id/textView12"
-        android:layout_width="186dp"
-        android:layout_height="120dp"
-        android:layout_marginBottom="8dp"
-        android:text="@string/members"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@+id/textView13"
-        app:layout_constraintStart_toStartOf="@+id/textView17" />
-
-    <TextView
-        android:id="@+id/textView13"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/specification"
-        android:textSize="20sp"
-        android:textStyle="bold|italic"
-        app:layout_constraintBottom_toTopOf="@+id/textView15"
-        app:layout_constraintStart_toStartOf="@+id/textView15" />
-
-    <TextView
-        android:id="@+id/textView14"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="About Us"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/textView_about"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/textView15"
         android:layout_width="0dp"
-        android:layout_height="49dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="30dp"
+        android:layout_marginEnd="30dp"
         android:layout_marginStart="30dp"
-        android:layout_marginEnd="21dp"
-        android:text="@string/specification_1"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@+id/textView16"
-        app:layout_constraintEnd_toEndOf="@+id/textView16"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/textView16"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-        android:layout_marginBottom="10dp"
-        android:text="@string/app_version"
-        android:textSize="20sp"
+        android:layout_marginTop="30dp"
+        android:text="@string/about_page"
+        android:textAlignment="center"
+        android:textColor="@android:color/black"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/textView17"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/member"
-        android:textSize="20sp"
-        android:textStyle="bold|italic"
-        app:layout_constraintBottom_toTopOf="@+id/textView12"
-        app:layout_constraintStart_toStartOf="@+id/textView_about" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
 </android.support.constraint.ConstraintLayout>

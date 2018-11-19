@@ -16,4 +16,16 @@
         White indicates active. \n
         Green indicates passed. \n
         Red indicates prerequisites not met.</string>
+    <string name="about_page">About Us\n\n
+        Degree Programme Mapper was developed for wintec, by Catdog54.\n\n
+        Catdog54 Members:\n\n
+        Michael Aldous\n
+        David Taylor\n
+        Hayden Ferries\n
+        Corban Whiteman\n
+        Showan Simkhada\n\n\n\n\n
+        Specification:\n\n Platform:
+        Android\n
+        API Version: 28
+        \nAPP Version: 1</string>
 </resources>
