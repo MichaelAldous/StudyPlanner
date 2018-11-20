@@ -7,51 +7,98 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 
 public class ActivityEditor extends AppCompatActivity {
     MyDBHandler dbHandler = new MyDBHandler(this);
-    public static ArrayList<Module> moduleList = new ArrayList<>();
-    public static ArrayList<Module> editorList = new ArrayList<>();
-    private ListView moduleListView ;
-    private EditorModuleAdapter editorModuleAdapter;
+    private static ArrayList<Module> moduleList = new ArrayList<>();
+    private static ArrayList<Module> editorList = new ArrayList<>();
+    private static ArrayList<String> pathwayList = new ArrayList<>();
+    private static ArrayAdapter<String> moduleAdapter;// = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, modIdList);
+    private static ArrayList<String> modSpinnerList = new ArrayList<>();
     private String moduleID;
     private String pathway;
     private Integer semester;
-    private Boolean firstloadP = true;
-    private Boolean firstloadS = true;
     private Boolean firstloadRB = true;
+    private Spinner modulesSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
 
-        final Spinner modulesSpinner = findViewById(R.id.editor_spinner_modules);
+        modulesSpinner = findViewById(R.id.editor_spinner_modules);
         moduleList = dbHandler.GetEditorModules();
-        ArrayList<String> modIdList = new ArrayList<>();
-        for(Module mod: moduleList){
-            modIdList.add(mod.getModuleId());
-        }
-        ArrayAdapter<String> moduleAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, modIdList);
-        modulesSpinner.setAdapter(moduleAdapter);
 
-        moduleID = modulesSpinner.getSelectedItem().toString();
+        this.updateModuleSpinner();
 
-        // Pathway selector
+        final EditText etModId = (EditText) findViewById(R.id.et_modId);
+        final EditText etModName = (EditText) findViewById(R.id.et_modName);
+        final EditText etModCredits = (EditText) findViewById(R.id.et_credits);
+        final Spinner spinner_semester = (Spinner) findViewById(R.id.spinner_semester);
+        final Spinner spinner_pathway = (Spinner) findViewById(R.id.spinner_pathways);
+        final Spinner spinner_prereq = (Spinner) findViewById(R.id.spinner_prereq);
+
+        ArrayList<Integer> semesterList = dbHandler.GetSemesters();
+        ArrayAdapter<Integer> semesterAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, semesterList);
+        spinner_semester.setAdapter(semesterAdapter);
+
+
+
+        // Module selector
+        // Loads module data into editText and spinners
         modulesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                moduleID = modulesSpinner.getSelectedItem().toString();
-                if(!firstloadP){
-                    //refreshModuleList(pathway, semester);
-                }else {
-                    firstloadP = false;
+                //moduleID = modulesSpinner.getSelectedItem().toString();
+                //refreshModuleList(pathway, semester);
+                if(moduleList.contains(findMod(modulesSpinner.getSelectedItem().toString()))){
+                    Module selectedMod = findMod(modulesSpinner.getSelectedItem().toString());
+                    etModId.setText(selectedMod.getModuleId());
+                    etModName.setText(selectedMod.getModuleName());
+                    etModCredits.setText(""+selectedMod.getModuleCredits());
+                    spinner_semester.setSelection(selectedMod.getModuleSemester()-1);
+
+                    //Pathway spinner
+                    ArrayList<StateVO> listVOs = new ArrayList<>();
+                    StateVO titleStateVO = new StateVO();
+                    titleStateVO.setTitle("Select Pathways");
+                    listVOs.add(titleStateVO);
+                    pathwayList = dbHandler.EditorGetPathways();
+                    for(int j = 0; j < pathwayList.size(); j++){
+                        StateVO stateVO = new StateVO();
+                        stateVO.setTitle(pathwayList.get(j));
+                        stateVO.setSelected(modInPathway(pathwayList.get(j), selectedMod.getModuleId()));
+                        listVOs.add(stateVO);
+                    }
+                    MySpinnerAdapter mySpinnerAdapter = new MySpinnerAdapter(ActivityEditor.this, 0, listVOs);
+                    spinner_pathway.setAdapter(mySpinnerAdapter);
+
+                    //Prerequisite spinner
+                    listVOs = new ArrayList<>();
+                    titleStateVO = new StateVO();
+                    titleStateVO.setTitle("Select Prerequisites");
+                    listVOs.add(titleStateVO);
+                    for(Module mod: moduleList){
+                        StateVO stateVO = new StateVO();
+                        stateVO.setTitle(mod.getModuleId());
+                        stateVO.setSelected(mod.getModulePrereqs().contains(selectedMod.getModuleId()));
+                    }
+                    mySpinnerAdapter = new MySpinnerAdapter(ActivityEditor.this, 0, listVOs);
+                    spinner_prereq.setAdapter(mySpinnerAdapter);
+
+
+
+                } else {
+
                 }
+
             }
 
             @Override
@@ -94,7 +141,7 @@ public class ActivityEditor extends AppCompatActivity {
                                     emailSender,
                                     emailSender);
                         } catch (Exception e) {
-                            Toast.makeText(getApplicationContext(),"Error",Toast.LENGTH_LONG).show();                        }
+                            Toast.makeText(getApplicationContext(),"Error",Toast.LENGTH_LONG).show();}
                     }
                 }).start();
             }
@@ -107,8 +154,16 @@ public class ActivityEditor extends AppCompatActivity {
 
             }
         });
+    }
 
-        //refreshModuleList(pathway, semester);
+    public boolean modInPathway(String pathway, String moduleID){
+        Module mod = findMod(moduleID);
+        for(String pathways: mod.getPathways()){
+            if(pathways.contains(pathway)){
+                return true;
+            }
+        }
+        return false;
     }
 
     // Used by requirementsMet to get Module object
@@ -119,6 +174,14 @@ public class ActivityEditor extends AppCompatActivity {
             }
         }
         return null;
+    }
+
+    public void updateModuleSpinner(){
+        for(Module mod: moduleList){
+            modSpinnerList.add(mod.getModuleId());
+        }
+        moduleAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, modSpinnerList);
+        modulesSpinner.setAdapter(moduleAdapter);
     }
 
     private String compileMessage(String pathway){
@@ -144,22 +207,22 @@ public class ActivityEditor extends AppCompatActivity {
         return message;
     }
 
-    public void refreshModuleList(String pathway, Integer semester){
+    public void refreshModuleList(){
         editorList.clear();
         for(Module m: moduleList ){
             editorList.add(m);
             if(m.getModuleSemester().equals(semester) && (m.getPathways().contains(pathway) || m.getPathways().contains("Core"))){
             }
         }
-        editorModuleAdapter = new EditorModuleAdapter(this, editorList);
-        moduleListView.setAdapter(editorModuleAdapter);
+        //editorModuleAdapter = new EditorModuleAdapter(this, editorList);
+        //moduleListView.setAdapter(editorModuleAdapter);
         Log.d("PARENT", "refreshStudentList: " + editorList);
         Log.d("PARENT", "refreshStudentList: " + moduleList);
-        editorModuleAdapter.notifyDataSetChanged();
+        //editorModuleAdapter.notifyDataSetChanged();
 
-        if(moduleListView.getAdapter().getCount() == 0){
-            Toast.makeText(getApplicationContext(), "Error, no modules found. Please recreate student.",
-                    Toast.LENGTH_LONG).show();
-        }
+        //if(moduleListView.getAdapter().getCount() == 0){
+        //    Toast.makeText(getApplicationContext(), "Error, no modules found. Please recreate student.",
+        //            Toast.LENGTH_LONG).show();
+        //}
     }
 }

@@ -164,6 +164,24 @@ public class MyDBHandler extends SQLiteOpenHelper {
         return modPaths;
     }
 
+    public ArrayList<String> EditorGetPathways(){
+        ArrayList<String> pathwayList = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        String query = " SELECT * FROM " + editorPathwaysEntry.TABLE_PATHWAYS +";";
+        Cursor cursor = db.rawQuery(query, null);
+        if(cursor != null){
+            if (cursor.moveToFirst()){
+                do {
+                    String pathwayString = cursor.getString(cursor.getColumnIndex(pathwaysEntry.COLUMN_PATH_NAME));
+                    pathwayList.add(pathwayString);
+                } while(cursor.moveToNext());
+            }
+            cursor.close();
+        }
+        db.close();
+        return pathwayList;
+    }
+
     public ArrayList<String> EditorGetModPrereq(String modID){
         ArrayList<String> modPrereq = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
@@ -183,6 +201,24 @@ public class MyDBHandler extends SQLiteOpenHelper {
         }
         db.close();
         return modPrereq;
+    }
+
+    public ArrayList<Integer> EditorGetSemesters(){
+        ArrayList<Integer> semesterList = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        String query = " SELECT DISTINCT " + editorModulesEntry.COLUMN_MP_SEMESTER + " FROM " + modulesEntry.TABLE_MODULES + ";";
+        Cursor cursor = db.rawQuery(query, null);
+        if(cursor != null){
+            if (cursor.moveToFirst()){
+                do {
+                    Integer semesterInt = cursor.getInt(cursor.getColumnIndex(modulesEntry.COLUMN_MP_SEMESTER));
+                    semesterList.add(semesterInt);
+                } while(cursor.moveToNext());
+            }
+            cursor.close();
+        }
+        db.close();
+        return semesterList;
     }
 
     // --------------------------------- END OF EDITOR STUFF --------------------------------- //
