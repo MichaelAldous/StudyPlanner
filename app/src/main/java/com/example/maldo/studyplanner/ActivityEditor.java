@@ -27,6 +27,9 @@ public class ActivityEditor extends AppCompatActivity {
     private Integer semester;
     private Boolean firstloadRB = true;
     private Spinner modulesSpinner;
+    private Spinner spinner_semester;
+    private Spinner spinner_pathway;
+    private Spinner spinner_prereq;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,9 +44,9 @@ public class ActivityEditor extends AppCompatActivity {
         final EditText etModId = (EditText) findViewById(R.id.et_modId);
         final EditText etModName = (EditText) findViewById(R.id.et_modName);
         final EditText etModCredits = (EditText) findViewById(R.id.et_credits);
-        final Spinner spinner_semester = (Spinner) findViewById(R.id.spinner_semester);
-        final Spinner spinner_pathway = (Spinner) findViewById(R.id.spinner_pathways);
-        final Spinner spinner_prereq = (Spinner) findViewById(R.id.spinner_prereq);
+        spinner_semester = (Spinner) findViewById(R.id.spinner_semester);
+        spinner_pathway = (Spinner) findViewById(R.id.spinner_pathways);
+        spinner_prereq = (Spinner) findViewById(R.id.spinner_prereq);
 
         ArrayList<Integer> semesterList = dbHandler.GetSemesters();
         ArrayAdapter<Integer> semesterAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, semesterList);
@@ -66,40 +69,35 @@ public class ActivityEditor extends AppCompatActivity {
                     spinner_semester.setSelection(selectedMod.getModuleSemester()-1);
 
                     //Pathway spinner
-                    ArrayList<StateVO> listVOs = new ArrayList<>();
+                    ArrayList<StateVO> pathwayVOList = new ArrayList<>();
                     StateVO titleStateVO = new StateVO();
                     titleStateVO.setTitle("Select Pathways");
-                    listVOs.add(titleStateVO);
+                    pathwayVOList.add(titleStateVO);
                     pathwayList = dbHandler.EditorGetPathways();
                     for(int j = 0; j < pathwayList.size(); j++){
                         StateVO stateVO = new StateVO();
                         stateVO.setTitle(pathwayList.get(j));
                         stateVO.setSelected(modInPathway(pathwayList.get(j), selectedMod.getModuleId()));
-                        listVOs.add(stateVO);
+                        pathwayVOList.add(stateVO);
                     }
-                    MySpinnerAdapter mySpinnerAdapter = new MySpinnerAdapter(ActivityEditor.this, 0, listVOs);
+                    MySpinnerAdapter mySpinnerAdapter = new MySpinnerAdapter(ActivityEditor.this, 0, pathwayVOList);
                     spinner_pathway.setAdapter(mySpinnerAdapter);
 
                     //Prerequisite spinner
-                    listVOs = new ArrayList<>();
+                    ArrayList<StateVO> prereqVOList = new ArrayList<>();
                     titleStateVO = new StateVO();
                     titleStateVO.setTitle("Select Prerequisites");
-                    listVOs.add(titleStateVO);
+                    prereqVOList.add(titleStateVO);
                     for(Module mod: moduleList){
                         StateVO stateVO = new StateVO();
                         stateVO.setTitle(mod.getModuleId());
                         stateVO.setSelected(mod.getModulePrereqs().contains(selectedMod.getModuleId()));
-                        listVOs.add(stateVO);
+                        prereqVOList.add(stateVO);
                     }
-                    mySpinnerAdapter = new MySpinnerAdapter(ActivityEditor.this, 0, listVOs);
+                    mySpinnerAdapter = new MySpinnerAdapter(ActivityEditor.this, 0, prereqVOList);
                     spinner_prereq.setAdapter(mySpinnerAdapter);
 
-
-
-                } else {
-
                 }
-
             }
 
             @Override
@@ -114,6 +112,8 @@ public class ActivityEditor extends AppCompatActivity {
             public void onClick(View view) {
                 if(!firstloadRB) {
                     dbHandler.createEditorDB();
+                    moduleList = dbHandler.GetEditorModules();
+
                     //refreshModuleList(pathway, semester);
                 } else {
                     firstloadRB = false;
@@ -152,7 +152,83 @@ public class ActivityEditor extends AppCompatActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                MySpinnerAdapter pathwaySpinnerList = (MySpinnerAdapter) spinner_pathway.getAdapter();
+                MySpinnerAdapter prereqSpinnerList = (MySpinnerAdapter) spinner_prereq.getAdapter();
 
+                if(moduleList.contains(findMod(etModId.getText().toString()))){
+                    Module module = findMod(etModId.getText().toString());
+                    module.setModName(etModName.getText().toString());
+                    module.setModCredits(Integer.parseInt(etModCredits.getText().toString()));
+                    module.setModSemester(Integer.parseInt(spinner_semester.getSelectedItem().toString()));
+                    ArrayList<String> pathways = new ArrayList<>();
+                    for(int i = 1; i < pathwaySpinnerList.getCount(); i++){
+                        if(pathwaySpinnerList.getItem(i).isSelected()){
+                            pathways.add(pathwaySpinnerList.getItem(i).getTitle());
+                        }
+                    }
+                    module.setModPathways(pathways);
+                    ArrayList<String> prereq = new ArrayList<>();
+                    for(int i = 1; i < prereqSpinnerList.getCount(); i++){
+                        if(prereqSpinnerList.getItem(i).isSelected()){
+                            prereq.add(prereqSpinnerList.getItem(i).getTitle());
+                        }
+                    }
+                    module.setModPrereqs(prereq);
+                    Toast.makeText(getApplicationContext(),"Module "+ module.getModuleId() +" updated!",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(),"Module not found, add first!",Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+
+        Button addButton = (Button) findViewById(R.id.editor_buttonAdd);
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MySpinnerAdapter pathwaySpinnerList = (MySpinnerAdapter) spinner_pathway.getAdapter();
+                MySpinnerAdapter prereqSpinnerList = (MySpinnerAdapter) spinner_prereq.getAdapter();
+
+                ArrayList<String> pathways = new ArrayList<>();
+                for(int i = 1; i < pathwaySpinnerList.getCount(); i++){
+                    if(pathwaySpinnerList.getItem(i).isSelected()){
+                        pathways.add(pathwaySpinnerList.getItem(i).getTitle());
+                    }
+                }
+                ArrayList<String> prereq = new ArrayList<>();
+                for(int i = 1; i < prereqSpinnerList.getCount(); i++){
+                    if(prereqSpinnerList.getItem(i).isSelected()){
+                        prereq.add(prereqSpinnerList.getItem(i).getTitle());
+                    }
+                }
+                if(!moduleList.contains(findMod(etModId.getText().toString()))){
+                    moduleList.add(new Module(
+                            etModId.getText().toString(),
+                            etModName.getText().toString(),
+                            "",
+                            prereq,
+                            pathways,
+                            Integer.parseInt(spinner_semester.getSelectedItem().toString()),
+                            Integer.parseInt(etModCredits.getText().toString()),
+                            "active"
+                    ));
+                    Toast.makeText(getApplicationContext(),"Module "+  etModId.getText().toString() +" added!",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(),"Module already exists!",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        Button deleteButton = (Button) findViewById(R.id.editor_buttonDelete);
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (moduleList.contains(findMod(etModId.getText().toString()))) {
+                    moduleList.remove(findMod(etModId.getText().toString()));
+                    Toast.makeText(getApplicationContext(),"Module removed!",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(),"Module not found!",Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }

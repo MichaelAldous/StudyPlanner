@@ -25,6 +25,8 @@ public class MySpinnerAdapter extends ArrayAdapter<StateVO> {
             this.mySpinnerAdapter = this;
         }
 
+
+
         @Override
         public View getDropDownView(int position, View convertView,
                                     ViewGroup parent) {
@@ -84,4 +86,8 @@ public class MySpinnerAdapter extends ArrayAdapter<StateVO> {
             private TextView mTextView;
             private CheckBox mCheckBox;
         }
+
+    public ArrayList<StateVO> getList(){
+        return listState;
     }
+}

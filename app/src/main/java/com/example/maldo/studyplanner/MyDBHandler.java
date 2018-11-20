@@ -221,6 +221,67 @@ public class MyDBHandler extends SQLiteOpenHelper {
         return semesterList;
     }
 
+    // Updated editor modules
+    public void EditorUpdateModules(Module module){
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(editorModulesEntry.COLUMN_MOD_NAME,module.getModuleName());
+        values.put(editorModulesEntry.COLUMN_MOD_CRED,module.getModuleCredits());
+        values.put(editorModulesEntry.COLUMN_MP_SEMESTER,module.getModuleSemester());
+        values.put(editorModulesEntry.COLUMN_MOD_DESC, module.getModuleDescription());
+        db.update(editorModulesEntry.TABLE_MODULES, values, editorModulesEntry.COLUMN_MOD_ID + "= '" + module.getModuleId()+ "'", null);
+
+        //db.delete(editorModPathsEntry.TABLE_MOD_PATH, module.getModuleId(), editorModPathsEntry.COLUMN_MP_MOD_ID);
+        db.execSQL("DELETE FROM " + editorModPathsEntry.TABLE_MOD_PATH + " WHERE '" + module.getModuleId() + "' = '"+ editorModPathsEntry.COLUMN_MP_MOD_ID +"';");
+        if(module.getModulePrereqs().size()>0){
+            for (String s : module.getPathways()) {
+               /*
+                db.execSQL(
+                        "INSERT INTO "+editorModPathsEntry.TABLE_MOD_PATH+
+                                "("+editorModPathsEntry.COLUMN_MP_MOD_ID+","+editorModPathsEntry.COLUMN_MP_PATH_ID+")" +
+                                " VALUES ('"+modID+"','"+s+"');"
+                );
+                */
+            }
+        }
+
+
+        db.close();
+
+
+        /*
+        db.insert(modulesEntry.TABLE_MODULES, null, values);
+
+        //Add module pre-requirements
+        if(prereq!=null) {
+            for (String s : prereq) {
+                db.execSQL(
+                        "INSERT INTO "+modPrereqEntry.TABLE_REQUIREMENTS+
+                                "("+modPrereqEntry.COLUMN_REQ_MOD_ID+","+modPrereqEntry.COLUMN_REQ_REQMOD_ID+")" +
+                                " VALUES ('"+modID+"','"+s+"');"
+                );
+            }
+        }
+
+        if(pathways.size()>0){
+            for(Integer pathID : pathways){
+                db.execSQL(
+                        "INSERT INTO "+modPathsEntry.TABLE_MOD_PATH+
+                                "("+modPathsEntry.COLUMN_MP_MOD_ID+","+modPathsEntry.COLUMN_MP_PATH_ID+")" +
+                                " VALUES ('"+modID+"','"+pathID+"');"
+                );
+            }
+        } else {
+            db.execSQL(
+                    "INSERT INTO "+modPathsEntry.TABLE_MOD_PATH+
+                            "("+modPathsEntry.COLUMN_MP_MOD_ID+","+modPathsEntry.COLUMN_MP_PATH_ID+")" +
+                            " VALUES ('"+modID+"',5);"
+            );
+        }
+        */
+    }
+
+
     // --------------------------------- END OF EDITOR STUFF --------------------------------- //
 
     // --------------------------------- PLANNER STUFF --------------------------------- //
