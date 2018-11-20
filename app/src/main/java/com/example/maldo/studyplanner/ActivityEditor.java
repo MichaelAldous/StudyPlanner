@@ -1,6 +1,8 @@
 package com.example.maldo.studyplanner;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -37,9 +39,9 @@ public class ActivityEditor extends AppCompatActivity {
         setContentView(R.layout.activity_editor);
 
         modulesSpinner = findViewById(R.id.editor_spinner_modules);
-        moduleList = dbHandler.GetEditorModules();
 
         this.updateModuleSpinner();
+        editorList = moduleList;
 
         final EditText etModId = (EditText) findViewById(R.id.et_modId);
         final EditText etModName = (EditText) findViewById(R.id.et_modName);
@@ -110,19 +112,17 @@ public class ActivityEditor extends AppCompatActivity {
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!firstloadRB) {
-                    dbHandler.createEditorDB();
-                    moduleList = dbHandler.GetEditorModules();
-
-                    //refreshModuleList(pathway, semester);
-                } else {
-                    firstloadRB = false;
-                }
+                dbHandler.createEditorDB();
+                moduleList = dbHandler.GetEditorModules();
+                updateModuleSpinner();
+                Toast.makeText(getApplicationContext(),"Modules reset!",Toast.LENGTH_SHORT).show();
             }
         });
 
 
         Button sendEmailButton = (Button) findViewById(R.id.editor_buttonEmail);
+        final String emailSender = "degreeprogrammemapper@gmail.com";
+        final String emailPW = "OursIsTheFury";
         sendEmailButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -130,8 +130,7 @@ public class ActivityEditor extends AppCompatActivity {
                     @Override
                     public void run() {
                         try {
-                            String emailSender = "degreeprogrammemapper@gmail.com";
-                            String emailPW = "OursIsTheFury";
+
                             String message = compileMessage(pathway);
 
                             GMailSender sender = new GMailSender(
@@ -145,6 +144,7 @@ public class ActivityEditor extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(),"Error",Toast.LENGTH_LONG).show();}
                     }
                 }).start();
+                Toast.makeText(getApplicationContext(), "Email Sent to " + emailSender, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -174,6 +174,7 @@ public class ActivityEditor extends AppCompatActivity {
                         }
                     }
                     module.setModPrereqs(prereq);
+                    dbHandler.EditorUpdateModules(module);
                     Toast.makeText(getApplicationContext(),"Module "+ module.getModuleId() +" updated!",Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(getApplicationContext(),"Module not found, add first!",Toast.LENGTH_SHORT).show();
@@ -202,7 +203,7 @@ public class ActivityEditor extends AppCompatActivity {
                     }
                 }
                 if(!moduleList.contains(findMod(etModId.getText().toString()))){
-                    moduleList.add(new Module(
+                    Module module = new Module(
                             etModId.getText().toString(),
                             etModName.getText().toString(),
                             "",
@@ -210,8 +211,10 @@ public class ActivityEditor extends AppCompatActivity {
                             pathways,
                             Integer.parseInt(spinner_semester.getSelectedItem().toString()),
                             Integer.parseInt(etModCredits.getText().toString()),
-                            "active"
-                    ));
+                            "active");
+                    moduleList.add(module);
+                    dbHandler.EditorAddModule(module);
+                    updateModuleSpinner();
                     Toast.makeText(getApplicationContext(),"Module "+  etModId.getText().toString() +" added!",Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(getApplicationContext(),"Module already exists!",Toast.LENGTH_SHORT).show();
@@ -224,8 +227,31 @@ public class ActivityEditor extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (moduleList.contains(findMod(etModId.getText().toString()))) {
-                    moduleList.remove(findMod(etModId.getText().toString()));
-                    Toast.makeText(getApplicationContext(),"Module removed!",Toast.LENGTH_SHORT).show();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ActivityEditor.this);
+                    builder.setCancelable(true);
+                    builder.setTitle("Remove Module?");
+                    builder.setMessage("Are you sure you want to remove module: " + etModId.getText().toString() + "?");
+                    builder.setPositiveButton("Confirm",
+                            new DialogInterface.OnClickListener(){
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int which){
+                                    Module module = findMod(etModId.getText().toString());
+                                    moduleList.remove(module.getModuleId());
+                                    dbHandler.EditorDeleteModule(module);
+                                    updateModuleSpinner();
+                                    Toast.makeText(getApplicationContext(),"Module removed!",Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                    builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener(){
+                        public void onClick(DialogInterface dialogInterface, int which){
+                            Toast.makeText(getApplicationContext(), "Cancelled",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+
                 } else {
                     Toast.makeText(getApplicationContext(),"Module not found!",Toast.LENGTH_SHORT).show();
                 }
@@ -254,6 +280,9 @@ public class ActivityEditor extends AppCompatActivity {
     }
 
     public void updateModuleSpinner(){
+        moduleList.clear();
+        modSpinnerList.clear();
+        moduleList = dbHandler.GetEditorModules();
         for(Module mod: moduleList){
             modSpinnerList.add(mod.getModuleId());
         }
@@ -262,44 +291,19 @@ public class ActivityEditor extends AppCompatActivity {
     }
 
     private String compileMessage(String pathway){
-        String message =  "Degree Mapper for " + "" + " \n" +
-                "Pathway: " + pathway + " \n";
+        String message =  "Degree Mapper: " + " \n";
         for(int i = 1; i < 7; i++){
             message = message + "------------------------ \n" +
                     "Semester: " + i + " \n"
                     + "------------------------ \n";
             for(Module mod: moduleList){
-                if((mod.getPathways().contains(pathway) || mod.getPathways().contains("Core")) && mod.getModuleSemester().equals(i)){
-                    if(mod.getModuleStatus().equals("rnm")){
-                        message = message + mod.getModuleId() + ", Requirements Not Met \n";
-                    } else if (mod.getModuleStatus().equals("active")){
-                        message = message + mod.getModuleId() + ", Active \n";
-                    } else {
-                        message = message + mod.getModuleId() + ", Passed \n";
-                    }
+                if(mod.getModuleSemester().equals(i)){
+                    message = message + "Mod Id: " + mod.getModuleId() + ", Name: " + mod.getModuleName() + ", Semester: " + mod.getModuleSemester() + "\n" +
+                    "Pathways: " + mod.getPathways() + ", Prerequisites: " + mod.getModulePrereqs() + "\n\n";
                 }
             }
         }
 
         return message;
-    }
-
-    public void refreshModuleList(){
-        editorList.clear();
-        for(Module m: moduleList ){
-            editorList.add(m);
-            if(m.getModuleSemester().equals(semester) && (m.getPathways().contains(pathway) || m.getPathways().contains("Core"))){
-            }
-        }
-        //editorModuleAdapter = new EditorModuleAdapter(this, editorList);
-        //moduleListView.setAdapter(editorModuleAdapter);
-        Log.d("PARENT", "refreshStudentList: " + editorList);
-        Log.d("PARENT", "refreshStudentList: " + moduleList);
-        //editorModuleAdapter.notifyDataSetChanged();
-
-        //if(moduleListView.getAdapter().getCount() == 0){
-        //    Toast.makeText(getApplicationContext(), "Error, no modules found. Please recreate student.",
-        //            Toast.LENGTH_LONG).show();
-        //}
     }
 }

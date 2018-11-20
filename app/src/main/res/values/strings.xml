@@ -30,7 +30,7 @@
     <string name="about_page2">\n
         <b>Specification:</b>\n
         Platform: Android\n
-        API Version: 28 \n
+        API Version: 5.0 \n
         APP Version: 1 \n
     </string>
 </resources>

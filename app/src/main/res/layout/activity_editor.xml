@@ -37,10 +37,13 @@
         android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:text="Email"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/editor_buttonSave" />
+        app:layout_constraintStart_toEndOf="@+id/editor_textView5"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/editor_textView5"
@@ -61,11 +64,14 @@
         android:id="@+id/editor_reset_button"
         android:layout_width="0dp"
         android:layout_height="40dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:text="Reset All Modules"
-        android:textSize="10sp"
+        android:textSize="8sp"
+        app:layout_constraintEnd_toStartOf="@+id/editor_textView5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/editor_buttonSave" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/editor_buttonSave"
@@ -76,8 +82,8 @@
         android:layout_marginTop="8dp"
         android:text="Save Changes"
         android:textSize="14sp"
-        app:layout_constraintEnd_toStartOf="@+id/editor_buttonEmail"
-        app:layout_constraintStart_toEndOf="@+id/editor_reset_button"
+        app:layout_constraintEnd_toStartOf="@+id/editor_buttonAdd"
+        app:layout_constraintStart_toEndOf="@+id/editor_buttonDelete"
         app:layout_constraintTop_toBottomOf="@+id/editor_textView5" />
 
     <TextView
@@ -176,7 +182,7 @@
     <Spinner
         android:id="@+id/spinner_semester"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="25dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
@@ -188,7 +194,7 @@
     <Spinner
         android:id="@+id/spinner_pathways"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="25dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
@@ -214,7 +220,7 @@
     <Spinner
         android:id="@+id/spinner_prereq"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="25dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
@@ -226,19 +232,67 @@
     <Button
         android:id="@+id/editor_buttonDelete"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:layout_marginStart="8dp"
         android:text="Delete Module"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/editor_buttonAdd" />
+        app:layout_constraintTop_toTopOf="@+id/editor_buttonSave" />
 
     <Button
         android:id="@+id/editor_buttonAdd"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:layout_marginEnd="8dp"
         android:text="Add Module"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editor_buttonSave" />
+        app:layout_constraintTop_toTopOf="@+id/editor_buttonSave" />
+
+    <TextView
+        android:id="@+id/textView14"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Instructions:"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spinner_prereq" />
+
+    <TextView
+        android:id="@+id/textView15"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text='To update existing module, click "save".'
+        android:textColor="#000000"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView14" />
+
+    <TextView
+        android:id="@+id/textView17"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text='To delete a module, select the module from the drop down list, and then click "Delete Module".'
+        android:textColor="#000000"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView16" />
+
+    <TextView
+        android:id="@+id/textView16"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text='To add a new module, change the "Module Id" to a new Id, and click "Add Module".'
+        android:textColor="#000000"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView15" />
 
 </android.support.constraint.ConstraintLayout>
