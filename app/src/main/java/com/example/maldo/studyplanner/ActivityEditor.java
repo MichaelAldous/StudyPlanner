@@ -89,6 +89,7 @@ public class ActivityEditor extends AppCompatActivity {
                         StateVO stateVO = new StateVO();
                         stateVO.setTitle(mod.getModuleId());
                         stateVO.setSelected(mod.getModulePrereqs().contains(selectedMod.getModuleId()));
+                        listVOs.add(stateVO);
                     }
                     mySpinnerAdapter = new MySpinnerAdapter(ActivityEditor.this, 0, listVOs);
                     spinner_prereq.setAdapter(mySpinnerAdapter);
